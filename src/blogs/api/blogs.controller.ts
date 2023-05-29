@@ -51,6 +51,9 @@ export class BlogsController {
     @Param('id') blogId: string,
     @Body() postData: PostInBlogInputModel,
   ) {
+    const blog = await this.BlogsQueryRepository.getBlogById(blogId);
+    if (!blog) throw new NotFoundException();
+
     const post = this.PostsService.createPost(blogId, postData);
     if (!post) throw new NotFoundException();
 
