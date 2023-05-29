@@ -35,11 +35,13 @@ export class PostsService {
       blogId,
       blogName,
       createdAt: new Date().toISOString(),
-      likes: [],
-      dislikes: [],
     };
 
-    const createdPost = await this.PostsRepository.createPost(newPost);
+    const createdPost = await this.PostsRepository.createPost({
+      ...newPost,
+      likes: [],
+      dislikes: [],
+    });
 
     return {
       id: createdPost._id,

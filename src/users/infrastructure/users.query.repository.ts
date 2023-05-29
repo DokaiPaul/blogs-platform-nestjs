@@ -62,8 +62,8 @@ export class UsersQueryRepository {
 
     let sortBy = 'createdAt';
     const sortDirection = queryParams.sortDirection ?? 'desc';
-    const pageNumber = queryParams.pageNumber || 1; //if passed param is equal to 0/null or undefined, the default value will be 1
-    const pageSize = queryParams.pageSize || 10; //if passed param is equal to 0/null or undefined, the default value will be 10
+    const pageNumber = +queryParams.pageNumber || 1; //if passed param is equal to 0/null or undefined, the default value will be 1
+    const pageSize = +queryParams.pageSize || 10; //if passed param is equal to 0/null or undefined, the default value will be 10
     const searchEmailTerm = queryParams.searchEmailTerm ?? null;
     const searchLoginTerm = queryParams.searchLoginTerm ?? null;
 

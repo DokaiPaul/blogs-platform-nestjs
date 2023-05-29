@@ -59,8 +59,8 @@ export class BlogsController {
 
   @Get(':id/posts')
   async getPostsInBlog(@Param('id') blogId: string, @Query() queryParams) {
-    const posts = this.PostsQueryRepository.getPosts(queryParams, blogId);
-    if (!posts) throw new NotFoundException();
+    const posts = await this.PostsQueryRepository.getPosts(queryParams, blogId);
+    if (posts.items.length === 0) throw new NotFoundException();
 
     return posts;
   }

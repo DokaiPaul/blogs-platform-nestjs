@@ -64,8 +64,8 @@ export class BlogsQueryRepository {
     const searchNameTerm = queryParams.searchNameTerm ?? null;
     let sortBy = 'createdAt';
     const sorDirection = queryParams.sortDirection ?? 'desc';
-    const pageNum = queryParams.pageNumber || 1; //if passed param is equal to 0/null or undefined, the default value will be 1
-    const pageSize = queryParams.pageSize || 10; //if passed param is equal to 0/null or undefined, the default value will be 10
+    const pageNum = +queryParams.pageNumber || 1; //if passed param is equal to 0/null or undefined, the default value will be 1
+    const pageSize = +queryParams.pageSize || 10; //if passed param is equal to 0/null or undefined, the default value will be 10
 
     if (queryParams.sortBy && propertyKeys.includes(queryParams.sortBy)) {
       sortBy = queryParams.sortBy;
