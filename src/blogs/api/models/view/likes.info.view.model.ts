@@ -11,14 +11,13 @@ export type ExtendedLikesInfoViewModel = {
   newestLikes: LikeDetailsViewModel[];
 };
 
-type LikeDetailsViewModel = {
-  description: string;
+export type LikeDetailsViewModel = {
   addedAt: string;
   userId: string;
   login: string;
 };
 
-enum LikeStatus {
+export enum LikeStatus {
   None = 'None',
   Like = 'Like',
   Dislike = 'Dislike',

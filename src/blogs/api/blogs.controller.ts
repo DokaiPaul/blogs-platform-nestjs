@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  NotFoundException,
   Param,
   Post,
   Put,
@@ -18,47 +20,69 @@ import { PostInBlogInputModel } from './models/input/post.input.model';
 @Controller('blogs')
 export class BlogsController {
   constructor(
-    private blogsService: BlogsService,
-    private blogsQueryRepository: BlogsQueryRepository,
-    private postsService: PostsService,
-    private postsQueryRepository: PostsQueryRepository,
+    private BlogsService: BlogsService,
+    private BlogsQueryRepository: BlogsQueryRepository,
+    private PostsService: PostsService,
+    private PostsQueryRepository: PostsQueryRepository,
   ) {}
 
+  @Post()
+  @HttpCode(201)
+  async createBlog(@Body() blogData: BlogInputModel) {
+    return this.BlogsService.createBlog(blogData);
+  }
+
   @Get()
-  getBlogs(@Query() queryParams) {
-    return this.blogsQueryRepository.getBlogs(queryParams);
+  async getBlogs(@Query() queryParams) {
+    return this.BlogsQueryRepository.getBlogs(queryParams);
   }
 
   @Get(':id')
-  getBlogById(@Param('id') blogId: string, @Query() queryParams) {
-    return this.blogsQueryRepository.getBlogById(blogId, queryParams);
-  }
+  async getBlogById(@Param('id') blogId: string, @Query() queryParams) {
+    const blog = await this.BlogsQueryRepository.getBlogById(blogId);
+    if (!blog) throw new NotFoundException();
 
-  @Get(':id/posts')
-  getPostsInBlog(@Param('id') blogId: string) {
-    return this.postsQueryRepository.getPostInBlog(blogId);
+    return blog;
   }
 
   @Post(':id/posts')
-  createPostInBlog(
+  @HttpCode(201)
+  async createPostInBlog(
     @Param('id') blogId: string,
     @Body() postData: PostInBlogInputModel,
   ) {
-    return this.postsService.createPost(blogId, postData);
+    const post = this.PostsService.createPost(blogId, postData);
+    if (!post) throw new NotFoundException();
+
+    return post;
   }
 
-  @Post()
-  createBlog(@Body() blogData: BlogInputModel) {
-    return this.blogsService.createBlog(blogData);
+  @Get(':id/posts')
+  async getPostsInBlog(@Param('id') blogId: string, @Query() queryParams) {
+    const posts = this.PostsQueryRepository.getPosts(queryParams, blogId);
+    if (!posts) throw new NotFoundException();
+
+    return posts;
   }
 
   @Put(':id')
-  updateBlogById(@Param('id') blogId: string) {
-    return this.blogsService.updateBlogById(blogId);
+  @HttpCode(204)
+  async updateBlogById(
+    @Param('id') blogId: string,
+    @Body() updatedData: BlogInputModel,
+  ) {
+    const blog = await this.BlogsService.updateBlogById(blogId, updatedData);
+    if (!blog) throw new NotFoundException();
+
+    return;
   }
 
   @Delete(':id')
-  deleteBlogById(@Param('id') blogId: string) {
-    return this.blogsService.deleteBlogById(blogId);
+  @HttpCode(204)
+  async deleteBlogById(@Param('id') blogId: string) {
+    const isDeleted = await this.BlogsService.deleteBlogById(blogId);
+    if (!isDeleted) throw new NotFoundException();
+
+    return;
   }
 }

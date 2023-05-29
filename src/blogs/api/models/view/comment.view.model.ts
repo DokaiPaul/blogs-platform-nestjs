@@ -8,7 +8,7 @@ export type CommentViewModel = {
   likesInfo: LikesInfoViewModel;
 };
 
-type CommentatorInfo = {
+export type CommentatorInfo = {
   userId: string;
   userLogin: string;
 };

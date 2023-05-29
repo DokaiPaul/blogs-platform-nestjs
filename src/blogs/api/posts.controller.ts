@@ -3,9 +3,12 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  NotFoundException,
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { PostsService } from '../application/posts.service';
 import { PostsQueryRepository } from '../infrastructure/posts.query.repository';
@@ -15,38 +18,56 @@ import { PostInputModel } from './models/input/post.input.model';
 @Controller('posts')
 export class PostsController {
   constructor(
-    private postsService: PostsService,
-    private postsQueryRepository: PostsQueryRepository,
-    private commentsQueryRepository: CommentsQueryRepository,
+    private PostsService: PostsService,
+    private PostsQueryRepository: PostsQueryRepository,
+    private CommentsQueryRepository: CommentsQueryRepository,
   ) {}
 
+  @HttpCode(201)
+  @Post()
+  async createPost(@Body() postInput: PostInputModel) {
+    const post = await this.PostsService.createPost(
+      postInput.blogId,
+      postInput,
+    );
+    if (!post) throw new NotFoundException();
+
+    return post;
+  }
+
   @Get()
-  getPosts() {
-    return this.postsQueryRepository.getPosts();
+  async getPosts(@Query() queryParams) {
+    return this.PostsQueryRepository.getPosts(queryParams);
   }
 
   @Get(':id')
-  getPostById(@Param('id') postId: string) {
-    return this.postsQueryRepository.getPostById(postId);
+  async getPostById(@Param('id') postId: string) {
+    const post = await this.PostsQueryRepository.getPostById(postId);
+    if (!post) throw new NotFoundException();
+
+    return post;
   }
 
   @Get(':id/comments')
-  getCommentsInPost(@Param('id') postId: string) {
-    return this.commentsQueryRepository.getCommentsInPost(postId);
+  async getCommentsInPost(@Param('id') postId: string) {
+    return this.CommentsQueryRepository.getCommentsInPost(postId);
   }
 
-  @Post()
-  createPost(@Body() postInput: PostInputModel) {
-    return this.postsService.createPost('blogIdIsHere', postInput);
-  }
-
+  @HttpCode(204)
   @Put(':id')
-  updatePostById(@Param('id') postId: string) {
-    return this.postsService.updatePostById(postId);
+  async updatePostById(@Param('id') postId: string, @Body() updatedData) {
+    const post = await this.PostsService.updatePostById(postId, updatedData);
+    if (!post) throw new NotFoundException();
+
+    return post;
   }
 
+  @HttpCode(204)
   @Delete(':id')
-  deletePostById(@Param('id') postId: string) {
-    return this.postsService.deletePostById(postId);
+  async deletePostById(@Param('id') postId: string) {
+    const post = await this.PostsService.deletePostById(postId);
+    if (!post) throw new NotFoundException();
+
+    return post;
   }
 }

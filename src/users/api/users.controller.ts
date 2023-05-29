@@ -1,6 +1,21 @@
-import { Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  InternalServerErrorException,
+  NotFoundException,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { UsersService } from '../application/users.service';
 import { UsersQueryRepository } from '../infrastructure/users.query.repository';
+import { UserViewModel } from './models/view/user.view.model';
+import { UserInputModel } from './models/input/user.input.model';
+import { QueryUserParamsModel } from '../../blogs/api/models/input/query.params.model';
+import { PaginatorViewModel } from '../../blogs/api/models/view/paginator.view.model';
 
 @Controller('users')
 export class UsersController {
@@ -9,18 +24,30 @@ export class UsersController {
     private usersQueryRepository: UsersQueryRepository,
   ) {}
 
-  @Get()
-  getUser() {
-    return this.usersQueryRepository.getUsers('term');
-  }
-
+  @HttpCode(201)
   @Post()
-  createUser() {
-    return this.userService.createUser();
+  async createUser(
+    @Body() newUser: UserInputModel,
+  ): Promise<UserViewModel | null> {
+    const createdUser = await this.userService.createUser(newUser);
+    if (!createdUser) throw new InternalServerErrorException();
+
+    return createdUser;
   }
 
+  @Get()
+  async getUser(
+    @Query() queryParams: QueryUserParamsModel,
+  ): Promise<PaginatorViewModel<UserViewModel | []>> {
+    return await this.usersQueryRepository.getUsers(queryParams);
+  }
+
+  @HttpCode(204)
   @Delete(':id')
-  deleteUser(@Param('id') userId: string) {
-    return this.userService.deleteUser(userId);
+  async deleteUser(@Param('id') userId: string) {
+    const deletedUser = await this.userService.deleteUser(userId);
+    if (!deletedUser) throw new NotFoundException();
+
+    return;
   }
 }

@@ -16,12 +16,19 @@ import { PostsQueryRepository } from './blogs/infrastructure/posts.query.reposit
 import { CommentsQueryRepository } from './blogs/infrastructure/comments.query.repository';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
+import { Blog, BlogSchema } from './blogs/infrastructure/blog.schema';
+import { Post, PostSchema } from './blogs/infrastructure/post.schema';
+import { Comment, CommentSchema } from './blogs/infrastructure/comments.schema';
+import { User, UserSchema } from './users/infrastructure/users.schema';
 
 @Module({
-  //todo complete mongodb connection
   imports: [
     ConfigModule.forRoot(),
     MongooseModule.forRoot(process.env.MONGO_URL),
+    MongooseModule.forFeature([{ name: Blog.name, schema: BlogSchema }]),
+    MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
+    MongooseModule.forFeature([{ name: Comment.name, schema: CommentSchema }]),
+    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
   ],
   controllers: [
     UsersController,

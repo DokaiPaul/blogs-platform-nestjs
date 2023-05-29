@@ -1,29 +1,81 @@
 import { Injectable } from '@nestjs/common';
 import { PostsRepository } from '../infrastructure/posts.repository';
-import { PostInBlogInputModel } from '../api/models/input/post.input.model';
+import {
+  PostInBlogInputModel,
+  PostInputModel,
+} from '../api/models/input/post.input.model';
+import { LikeStatus } from '../api/models/view/likes.info.view.model';
+import { BlogsQueryRepository } from '../infrastructure/blogs.query.repository';
+import { Post, PostDocument } from '../infrastructure/post.schema';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class PostsService {
-  constructor(private postsRepository: PostsRepository) {}
+  constructor(
+    private PostsRepository: PostsRepository,
+    @InjectModel(Post.name) private PostModel: Model<PostDocument>,
+    private BlogsQueryRepository: BlogsQueryRepository,
+  ) {}
 
-  createPost(blogId: string, postData: PostInBlogInputModel) {
+  async createPost(
+    blogId: string,
+    postData: PostInputModel | PostInBlogInputModel,
+  ) {
+    const { title, content, shortDescription } = postData;
+    const blog = await this.BlogsQueryRepository.getBlogById(blogId);
+    if (!blog) return null;
+
+    const blogName = blog.name;
+
     const newPost = {
-      id: 'ObjectId',
-      ...postData,
+      title,
+      shortDescription,
+      content,
+      blogId,
+      blogName,
+      createdAt: new Date().toISOString(),
+      likes: [],
+      dislikes: [],
     };
 
-    return this.postsRepository.createPost(newPost);
+    const createdPost = await this.PostsRepository.createPost(newPost);
+
+    return {
+      id: createdPost._id,
+      ...newPost,
+      extendedLikesInfo: {
+        likesCount: 0,
+        dislikesCount: 0,
+        myStatus: LikeStatus.None,
+        newestLikes: [],
+      },
+    };
   }
 
-  updatePostById(postId: string) {
-    return this.postsRepository.updatePostById(postId);
+  async updatePostById(postId: string, updatedData: PostInputModel) {
+    const { title, content, shortDescription, blogId } = updatedData;
+
+    const updatedPost = await this.PostModel.findById(postId);
+    if (!updatedPost) return null;
+
+    updatedPost.title = title;
+    updatedPost.content = content;
+    updatedPost.shortDescription = shortDescription;
+    updatedPost.blogId = blogId;
+
+    try {
+      await this.PostsRepository.save(updatedPost);
+
+      return true;
+    } catch (e) {
+      console.error(e);
+      return null;
+    }
   }
 
-  deletePostById(postId: string) {
-    return this.postsRepository.deletePostById(postId);
-  }
-
-  deletePostsInBlog(blogId: string) {
-    return this.postsRepository.deletePostsInBlog(blogId);
+  async deletePostById(blogId: string) {
+    const deletedPost = await this.PostsRepository.deletePostById(blogId);
+    return deletedPost.deletedCount === 1;
   }
 }

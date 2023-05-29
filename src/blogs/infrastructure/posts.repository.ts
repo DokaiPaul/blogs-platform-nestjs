@@ -1,20 +1,23 @@
 import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Post, PostDocument } from './post.schema';
+import { Model } from 'mongoose';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class PostsRepository {
-  createPost(newPost) {
-    return true;
+  constructor(@InjectModel(Post.name) private PostModel: Model<PostDocument>) {}
+
+  async createPost(newPost: Post) {
+    const post = await new this.PostModel(newPost);
+    return post.save();
   }
 
-  updatePostById(postId: string) {
-    return true;
+  async deletePostById(blogId: string) {
+    return this.PostModel.deleteOne({ _id: new ObjectId(blogId) });
   }
 
-  deletePostById(postId: string) {
-    return true;
-  }
-
-  deletePostsInBlog(blogId: string) {
-    return true;
+  async save(post: PostDocument) {
+    await post.save();
   }
 }
