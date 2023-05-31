@@ -5,13 +5,13 @@ export type UserDocument = HydratedDocument<User>;
 
 @Schema()
 export class User {
-  @Prop({ required: true })
+  @Prop({ required: true, unique: true })
   login: string;
 
   @Prop({ required: true })
   passwordHash: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, unique: true })
   email: string;
 
   @Prop({ default: new Date().toISOString() })
