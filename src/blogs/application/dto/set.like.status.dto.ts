@@ -1,6 +1,6 @@
 import { Matches } from 'class-validator';
 
-export class LikeInputModel {
+export class SetLikeStatusDto {
   @Matches('None|Like|Dislike')
   likeStatus: string;
 }

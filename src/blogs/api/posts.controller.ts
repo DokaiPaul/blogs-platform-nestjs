@@ -13,7 +13,7 @@ import {
 import { PostsService } from '../application/posts.service';
 import { PostsQueryRepository } from '../infrastructure/posts.query.repository';
 import { CommentsQueryRepository } from '../infrastructure/comments.query.repository';
-import { PostInputModel } from './models/input/post.input.model';
+import { CreatePostWithBlogIdDto } from '../application/dto/create.post.dto';
 
 @Controller('posts')
 export class PostsController {
@@ -25,7 +25,7 @@ export class PostsController {
 
   @HttpCode(201)
   @Post()
-  async createPost(@Body() postInput: PostInputModel) {
+  async createPost(@Body() postInput: CreatePostWithBlogIdDto) {
     const post = await this.PostsService.createPost(
       postInput.blogId,
       postInput,

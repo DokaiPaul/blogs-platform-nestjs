@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { BlogsRepository } from '../infrastructure/blogs.repository';
-import { BlogInputModel } from '../api/models/input/blog.input.model';
+import { CreateBlogDto } from './dto/create.blog.dto';
 import { BlogViewModel } from '../api/models/view/blog.view.model';
 import { Model } from 'mongoose';
 import { Blog, BlogDocument } from '../infrastructure/blog.schema';
@@ -14,7 +14,7 @@ export class BlogsService {
   ) {}
   s;
 
-  async createBlog(blogData: BlogInputModel): Promise<BlogViewModel> {
+  async createBlog(blogData: CreateBlogDto): Promise<BlogViewModel> {
     const { name, websiteUrl, description } = blogData;
 
     const newBlog = {
@@ -33,7 +33,7 @@ export class BlogsService {
     };
   }
 
-  async updateBlogById(blogId: string, updatedData: BlogInputModel) {
+  async updateBlogById(blogId: string, updatedData: CreateBlogDto) {
     const { websiteUrl, description, name } = updatedData;
 
     const updatedBlog = await this.BlogModel.findById(blogId);

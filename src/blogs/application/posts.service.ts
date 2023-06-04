@@ -1,9 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PostsRepository } from '../infrastructure/posts.repository';
-import {
-  PostInBlogInputModel,
-  PostInputModel,
-} from '../api/models/input/post.input.model';
+import { CreatePostDto, CreatePostWithBlogIdDto } from './dto/create.post.dto';
 import { LikeStatus } from '../api/models/view/likes.info.view.model';
 import { BlogsQueryRepository } from '../infrastructure/blogs.query.repository';
 import { Post, PostDocument } from '../infrastructure/post.schema';
@@ -20,7 +17,7 @@ export class PostsService {
 
   async createPost(
     blogId: string,
-    postData: PostInputModel | PostInBlogInputModel,
+    postData: CreatePostWithBlogIdDto | CreatePostDto,
   ) {
     const { title, content, shortDescription } = postData;
     const blog = await this.BlogsQueryRepository.getBlogById(blogId);
@@ -55,7 +52,7 @@ export class PostsService {
     };
   }
 
-  async updatePostById(postId: string, updatedData: PostInputModel) {
+  async updatePostById(postId: string, updatedData: CreatePostWithBlogIdDto) {
     const { title, content, shortDescription, blogId } = updatedData;
 
     const updatedPost = await this.PostModel.findById(postId);

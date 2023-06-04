@@ -14,8 +14,8 @@ import { BlogsService } from '../application/blogs.service';
 import { BlogsQueryRepository } from '../infrastructure/blogs.query.repository';
 import { PostsService } from '../application/posts.service';
 import { PostsQueryRepository } from '../infrastructure/posts.query.repository';
-import { BlogInputModel } from './models/input/blog.input.model';
-import { PostInBlogInputModel } from './models/input/post.input.model';
+import { CreateBlogDto } from '../application/dto/create.blog.dto';
+import { CreatePostDto } from '../application/dto/create.post.dto';
 
 @Controller('blogs')
 export class BlogsController {
@@ -28,7 +28,7 @@ export class BlogsController {
 
   @Post()
   @HttpCode(201)
-  async createBlog(@Body() blogData: BlogInputModel) {
+  async createBlog(@Body() blogData: CreateBlogDto) {
     return this.BlogsService.createBlog(blogData);
   }
 
@@ -49,7 +49,7 @@ export class BlogsController {
   @HttpCode(201)
   async createPostInBlog(
     @Param('id') blogId: string,
-    @Body() postData: PostInBlogInputModel,
+    @Body() postData: CreatePostDto,
   ) {
     const blog = await this.BlogsQueryRepository.getBlogById(blogId);
     if (!blog) throw new NotFoundException();
@@ -74,7 +74,7 @@ export class BlogsController {
   @HttpCode(204)
   async updateBlogById(
     @Param('id') blogId: string,
-    @Body() updatedData: BlogInputModel,
+    @Body() updatedData: CreateBlogDto,
   ) {
     const blog = await this.BlogsService.updateBlogById(blogId, updatedData);
     if (!blog) throw new NotFoundException();
