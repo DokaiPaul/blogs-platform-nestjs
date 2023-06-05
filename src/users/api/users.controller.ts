@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -30,7 +31,18 @@ export class UsersController {
     @Body() newUser: UserInputModel,
   ): Promise<UserViewModel | null> {
     const createdUser = await this.userService.createUser(newUser);
+
     if (!createdUser) throw new InternalServerErrorException();
+
+    if (createdUser === 'email')
+      throw new BadRequestException({
+        message: [{ message: 'This email is already taken', field: 'email' }],
+      });
+
+    if (createdUser === 'login')
+      throw new BadRequestException({
+        message: [{ message: 'This login is already taken', field: 'login' }],
+      });
 
     return createdUser;
   }

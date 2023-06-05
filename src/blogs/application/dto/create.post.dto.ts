@@ -1,4 +1,4 @@
-import { IsString, Length } from 'class-validator';
+import { IsMongoId, IsString, Length } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { trimFn } from '../../../utilities/transform.pipes';
 
@@ -21,5 +21,6 @@ export class CreatePostDto {
 
 export class CreatePostWithBlogIdDto extends CreatePostDto {
   @IsString()
+  @IsMongoId()
   blogId: string;
 }

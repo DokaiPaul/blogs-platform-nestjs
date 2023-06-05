@@ -7,6 +7,16 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 
+@Catch(Error)
+export class ErrorExceptionFilter implements ExceptionFilter {
+  catch(exception: ErrorExceptionFilter, host: ArgumentsHost) {
+    const context = host.switchToHttp();
+    const response = context.getResponse<Response>();
+
+    response.status(500).send('An internal Error has been occurred');
+  }
+}
+
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
   catch(exception: HttpException, host: ArgumentsHost) {
@@ -33,6 +43,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
       case 403:
         response.status(status).send(`You don't have the permissions`);
         break;
+      case 500:
+        response.status(status).send('An internal Error has been occurred');
     }
   }
 }

@@ -13,6 +13,14 @@ export class UsersRepository {
     return user.save();
   }
 
+  async findUserByLogin(login: string) {
+    return this.UserModel.findOne({ login: login });
+  }
+
+  async findUserByEmail(email: string) {
+    return this.UserModel.findOne({ email: email });
+  }
+
   async deleteUser(userId) {
     return this.UserModel.deleteOne({ _id: new ObjectId(userId) });
   }

@@ -20,6 +20,8 @@ import { Blog, BlogSchema } from './blogs/infrastructure/blog.schema';
 import { Post, PostSchema } from './blogs/infrastructure/post.schema';
 import { Comment, CommentSchema } from './blogs/infrastructure/comments.schema';
 import { User, UserSchema } from './users/infrastructure/users.schema';
+import { EmailsManager } from './managers/email.sender.manager';
+import { EmailAdapter } from './adapters/email.adapter';
 
 @Module({
   imports: [
@@ -48,6 +50,8 @@ import { User, UserSchema } from './users/infrastructure/users.schema';
     PostsRepository,
     PostsQueryRepository,
     CommentsQueryRepository,
+    EmailsManager,
+    EmailAdapter,
   ],
 })
 export class AppModule {}
