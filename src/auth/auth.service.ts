@@ -9,35 +9,11 @@ export class AuthService {
     private JwtService: JwtService,
   ) {}
 
-  async registerUser() {
-    return null;
-  }
-
-  async confirmRegistration() {
-    return null;
-  }
-
-  async resendEmailConfirmation() {
-    return null;
-  }
-
   async validateUser() {
     return null;
   }
 
   async login() {
-    return null;
-  }
-
-  async logout() {
-    return null;
-  }
-
-  async resetPassword() {
-    return null;
-  }
-
-  async setNewPassword() {
     return null;
   }
 }

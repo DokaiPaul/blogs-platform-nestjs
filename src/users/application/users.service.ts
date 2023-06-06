@@ -60,12 +60,42 @@ export class UsersService {
     };
   }
 
-  async confirmEmail(code: string) {
-    return null;
+  async confirmEmail(code: string): Promise<boolean | null> {
+    const user = await this.usersRepository.findUserByConfirmationCode(code);
+
+    if (!user) return null;
+    if (user.emailConfirmation.isConfirmed) return null;
+    if (new Date(user.emailConfirmation.expirationDate) < new Date())
+      return null;
+
+    const result = await this.usersRepository.updateConfirmationStatus(
+      user._id,
+    );
+
+    return result;
   }
 
-  async resendConfirmationCode(email: string) {
-    return null;
+  async resendConfirmationCode(searchTerm: string): Promise<boolean | null> {
+    const user = await this.usersRepository.findUserByEmailOrLogin(searchTerm);
+
+    if (!user) return null;
+    if (user.emailConfirmation.isConfirmed) return null;
+    const newConfirmationCode = uuidv4();
+
+    try {
+      await this.usersRepository.updateConfirmationCode(
+        user._id,
+        newConfirmationCode,
+      );
+      await this.EmailManager.sendEmailConfirmationCode(
+        user.email,
+        newConfirmationCode,
+      );
+      return true;
+    } catch (e) {
+      console.error(e);
+      return null;
+    }
   }
 
   async deleteUser(userId: string) {
@@ -74,12 +104,63 @@ export class UsersService {
     return deletedUser.deletedCount === 1;
   }
 
-  async sendEmailToResetPassword(email) {
-    return null;
+  async sendEmailToResetPassword(email): Promise<boolean | null> {
+    const user = await this.usersRepository.findUserByEmail(email);
+    if (!user) return null;
+
+    const confirmationCode = uuidv4();
+
+    const recoveryCodeObject = {
+      confirmationCode,
+      email,
+      isUsed: false,
+      creationDate: new Date().toISOString(),
+    };
+
+    try {
+      const result = await this.usersRepository.addRecoveryConfirmationCode(
+        recoveryCodeObject,
+      );
+      if (!result) return null;
+
+      await this.EmailManager.sendPasswordRecoveryCode(
+        user.email,
+        confirmationCode,
+      );
+      return true;
+    } catch (e) {
+      console.error(e);
+      return null;
+    }
   }
 
-  async setNewPassword(recoveryData) {
-    return null;
+  async setNewPassword(recoveryData): Promise<boolean | null> {
+    const result = await this.usersRepository.findRecoveryConfirmationCode(
+      recoveryData.recoveryCode,
+    );
+
+    if (!result) return null;
+    if (result.isUsed) return null;
+
+    const passwordSalt = await bcrypt?.genSalt(10);
+    const passwordHash = await this._generateHash(
+      recoveryData.newPassword,
+      passwordSalt,
+    );
+
+    const updateHash = await this.usersRepository.updateHash(
+      result.email,
+      passwordHash,
+    );
+
+    if (!updateHash) return null;
+
+    const changedStatus = await this.usersRepository.changeRecoveryCodeStatus(
+      result._id,
+    );
+    if (!changedStatus) return null;
+
+    return true;
   }
 
   async checkIfCredentialsUnique(
