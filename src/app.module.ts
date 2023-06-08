@@ -22,6 +22,8 @@ import { Comment, CommentSchema } from './blogs/infrastructure/comments.schema';
 import { User, UserSchema } from './users/infrastructure/users.schema';
 import { EmailsManager } from './managers/email.sender.manager';
 import { EmailAdapter } from './adapters/email.adapter';
+import { AuthController } from './auth/auth.controller';
+import { AuthService } from './auth/auth.service';
 
 @Module({
   imports: [
@@ -38,6 +40,7 @@ import { EmailAdapter } from './adapters/email.adapter';
     PostsController,
     CommentsController,
     TestingController,
+    AuthController,
   ],
   providers: [
     UsersService,
@@ -52,6 +55,7 @@ import { EmailAdapter } from './adapters/email.adapter';
     CommentsQueryRepository,
     EmailsManager,
     EmailAdapter,
+    AuthService,
   ],
 })
 export class AppModule {}

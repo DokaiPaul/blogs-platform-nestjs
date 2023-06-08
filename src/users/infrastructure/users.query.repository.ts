@@ -55,6 +55,10 @@ export class UsersQueryRepository {
     };
   }
 
+  async getUserById(userId: string) {
+    return this.UserModel.findById(userId);
+  }
+
   private getQueryParams(
     queryParams: QueryUserParamsModel,
   ): QueryUserParamsModel {

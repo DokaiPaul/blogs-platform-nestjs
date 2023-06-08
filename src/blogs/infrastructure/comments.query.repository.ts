@@ -9,11 +9,12 @@ export class CommentsQueryRepository {
     @InjectModel(Comment.name) private CommentModel: Model<CommentDocument>,
   ) {}
 
-  getCommentsInPost(postId: string) {
+  async getCommentsInPost(postId: string) {
     return [{}, {}];
   }
 
-  async getCommentById(commentId: string) {
-    return this.CommentModel.findById(commentId);
+  async getCommentById(commentId: string): Promise<CommentDocument | null> {
+    const comment = await this.CommentModel.findById(commentId);
+    return comment;
   }
 }
