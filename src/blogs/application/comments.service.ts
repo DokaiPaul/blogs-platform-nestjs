@@ -14,8 +14,11 @@ export class CommentsService {
     return;
   }
 
-  async deleteComment() {
-    return;
+  async deleteComment(commentId: string) {
+    //todo add extracting of user id to determine if the comment belongs to user
+    const result = await this.CommentsRepository.deleteComment(commentId);
+
+    return result.deletedCount === 1;
   }
 
   async setLikeStatus(statusDTO: CommentLikeStatusDto) {

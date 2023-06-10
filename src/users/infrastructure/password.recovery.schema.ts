@@ -12,7 +12,7 @@ export class PasswordRecovery {
   creationDate: string;
 
   @Prop({ required: true })
-  email: any;
+  email: string;
 
   @Prop({ default: false })
   isUsed: boolean;

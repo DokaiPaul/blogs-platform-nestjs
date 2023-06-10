@@ -24,6 +24,20 @@ import { EmailsManager } from './managers/email.sender.manager';
 import { EmailAdapter } from './adapters/email.adapter';
 import { AuthController } from './auth/auth.controller';
 import { AuthService } from './auth/auth.service';
+import {
+  ActiveSession,
+  ActiveSessionSchema,
+} from './devices/active.sessions.model';
+import { ActiveSessionService } from './devices/active.sessions.service';
+import { ActiveSessionRepository } from './devices/active.sessions.repository';
+import {
+  PasswordRecovery,
+  PasswordRecoverySchema,
+} from './users/infrastructure/password.recovery.schema';
+import { JwtService } from '@nestjs/jwt';
+import { CommentsRepository } from './blogs/infrastructure/comments.repository';
+import { CommentsService } from './blogs/application/comments.service';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -33,6 +47,13 @@ import { AuthService } from './auth/auth.service';
     MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
     MongooseModule.forFeature([{ name: Comment.name, schema: CommentSchema }]),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    MongooseModule.forFeature([
+      { name: PasswordRecovery.name, schema: PasswordRecoverySchema },
+    ]),
+    MongooseModule.forFeature([
+      { name: ActiveSession.name, schema: ActiveSessionSchema },
+    ]),
+    AuthModule,
   ],
   controllers: [
     UsersController,
@@ -53,9 +74,14 @@ import { AuthService } from './auth/auth.service';
     PostsRepository,
     PostsQueryRepository,
     CommentsQueryRepository,
+    CommentsRepository,
+    CommentsService,
     EmailsManager,
     EmailAdapter,
     AuthService,
+    ActiveSessionService,
+    ActiveSessionRepository,
+    JwtService,
   ],
 })
 export class AppModule {}

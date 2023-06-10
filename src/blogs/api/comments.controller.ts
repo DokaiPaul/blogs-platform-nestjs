@@ -81,10 +81,10 @@ export class CommentsController {
   @Delete(':id')
   @HttpCode(204)
   async deleteCommentById(@Param('id') commentId: string) {
-    let comment;
+    const result = await this.CommentService.deleteComment(commentId);
 
-    if (comment === 'not found') throw new NotFoundException();
-    if (comment === 'is not owner') throw new ForbiddenException();
+    // if (result === 'not found') throw new NotFoundException();
+    // if (result === 'is not owner') throw new ForbiddenException();
 
     return;
   }

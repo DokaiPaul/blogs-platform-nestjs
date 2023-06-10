@@ -3,9 +3,13 @@ import {
   Body,
   Controller,
   Get,
+  Headers,
   HttpCode,
   InternalServerErrorException,
   Post,
+  Req,
+  Res,
+  UseGuards,
 } from '@nestjs/common';
 import { UserInputModel } from '../users/api/models/input/user.input.model';
 import { UsersService } from '../users/application/users.service';
@@ -13,10 +17,15 @@ import {
   NewPasswordRecoveryInputModel,
   PasswordRecoveryInputModel,
 } from '../users/application/dto/password.recovery.input.model';
+import { AuthService } from './auth.service';
+import { LocalAuthGuard } from './guards/local-auth.guard';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private UserService: UsersService) {}
+  constructor(
+    private UserService: UsersService,
+    private AuthService: AuthService,
+  ) {}
 
   @Post('registration')
   @HttpCode(204)
@@ -64,8 +73,23 @@ export class AuthController {
   }
 
   //todo complete three endpoints below and last endpoint at the bottom
+  @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Body() credentials) {
+  async login(@Body() credentials, @Res() res, @Req() req, @Headers() headers) {
+    const ip = headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const title = headers['user-agent'];
+
+    if (!req.user || !ip || !title) throw new InternalServerErrorException();
+
+    const result = await this.AuthService.login(req.user, ip, title);
+    if (!result) throw new InternalServerErrorException();
+
+    res
+      .cookie('refreshToken', result.refreshToken, {
+        httpOnly: true,
+        secure: true,
+      })
+      .json({ accessToken: result.accessToken });
     return;
   }
 

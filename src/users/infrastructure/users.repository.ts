@@ -120,4 +120,10 @@ export class UsersRepository {
       return null;
     }
   }
+
+  async findUserByLoginOrEmail(loginOrEmail: string) {
+    return this.UserModel.findOne({
+      $or: [{ email: loginOrEmail }, { login: loginOrEmail }],
+    });
+  }
 }
