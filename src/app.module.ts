@@ -34,7 +34,7 @@ import {
   PasswordRecovery,
   PasswordRecoverySchema,
 } from './users/infrastructure/password.recovery.schema';
-import { JwtService } from '@nestjs/jwt';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 import { CommentsRepository } from './blogs/infrastructure/comments.repository';
 import { CommentsService } from './blogs/application/comments.service';
 import { AuthModule } from './auth/auth.module';
@@ -54,6 +54,7 @@ import { AuthModule } from './auth/auth.module';
       { name: ActiveSession.name, schema: ActiveSessionSchema },
     ]),
     AuthModule,
+    JwtModule.register({}),
   ],
   controllers: [
     UsersController,

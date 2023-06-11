@@ -9,12 +9,16 @@ import {
   NotFoundException,
   Param,
   Put,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { CommentsQueryRepository } from '../infrastructure/comments.query.repository';
 import { SetLikeStatusDto } from '../application/dto/set.like.status.dto';
 import { UsersQueryRepository } from '../../users/infrastructure/users.query.repository';
 import { CommentsRepository } from '../infrastructure/comments.repository';
 import { CommentsService } from '../application/comments.service';
+import { AccessTokenGuard } from '../../auth/guards/accessToken.guard';
+import { JwtService } from '@nestjs/jwt';
 
 @Controller('comments')
 export class CommentsController {
@@ -23,22 +27,36 @@ export class CommentsController {
     private CommentRepository: CommentsRepository,
     private CommentService: CommentsService,
     private UserQueryRepository: UsersQueryRepository,
+    private JwtService: JwtService,
   ) {}
 
   @Get(':id')
-  async getCommentById(@Param('id') commentId: string) {
+  async getCommentById(@Param('id') commentId: string, @Req() req) {
+    const refreshToken = req.cookies?.refreshToken ?? 'none';
+    let userId;
+
+    if (refreshToken !== 'none') {
+      const parsedToken = await this.JwtService.decode(refreshToken);
+
+      if (typeof parsedToken !== 'string') {
+        userId = parsedToken.userId;
+      }
+    }
+
     const comment = await this.CommentsQueryRepository.getCommentById(
       commentId,
+      userId,
     );
     if (!comment) throw new NotFoundException();
 
-    return comment;
+    return commentId;
   }
 
   //todo complete endpoints below
+  @UseGuards(AccessTokenGuard)
   @Put(':id')
   @HttpCode(204)
-  async updateCommentById(@Param('id') commentId: string) {
+  async updateCommentById(@Param('id') commentId: string, @Req() req: any) {
     let comment;
 
     if (comment === 'not found') throw new NotFoundException();
@@ -47,6 +65,7 @@ export class CommentsController {
     return;
   }
 
+  @UseGuards(AccessTokenGuard)
   @Put(':id/like-status')
   @HttpCode(204)
   async setLikeOnCommentById(
@@ -78,6 +97,7 @@ export class CommentsController {
     return;
   }
 
+  @UseGuards(AccessTokenGuard)
   @Delete(':id')
   @HttpCode(204)
   async deleteCommentById(@Param('id') commentId: string) {

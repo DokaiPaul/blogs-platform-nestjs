@@ -43,6 +43,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
       case 403:
         response.status(status).send(`You don't have the permissions`);
         break;
+
+      case 404:
+        response.status(status).send(`Not found`);
+        break;
+
       case 500:
         response.status(status).send('An internal Error has been occurred');
     }
