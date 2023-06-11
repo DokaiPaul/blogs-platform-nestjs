@@ -9,6 +9,7 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { BlogsService } from '../application/blogs.service';
 import { BlogsQueryRepository } from '../infrastructure/blogs.query.repository';
@@ -16,6 +17,7 @@ import { PostsService } from '../application/posts.service';
 import { PostsQueryRepository } from '../infrastructure/posts.query.repository';
 import { CreateBlogDto } from '../application/dto/create.blog.dto';
 import { CreatePostDto } from '../application/dto/create.post.dto';
+import { BasicAuthGuard } from '../../auth/guards/basic.guard';
 
 @Controller('blogs')
 export class BlogsController {
@@ -26,6 +28,7 @@ export class BlogsController {
     private PostsQueryRepository: PostsQueryRepository,
   ) {}
 
+  @UseGuards(BasicAuthGuard)
   @Post()
   @HttpCode(201)
   async createBlog(@Body() blogData: CreateBlogDto) {
@@ -45,6 +48,7 @@ export class BlogsController {
     return blog;
   }
 
+  @UseGuards(BasicAuthGuard)
   @Post(':id/posts')
   @HttpCode(201)
   async createPostInBlog(
@@ -70,6 +74,7 @@ export class BlogsController {
     return posts;
   }
 
+  @UseGuards(BasicAuthGuard)
   @Put(':id')
   @HttpCode(204)
   async updateBlogById(
@@ -82,6 +87,7 @@ export class BlogsController {
     return;
   }
 
+  @UseGuards(BasicAuthGuard)
   @Delete(':id')
   @HttpCode(204)
   async deleteBlogById(@Param('id') blogId: string) {

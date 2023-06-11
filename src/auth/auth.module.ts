@@ -21,6 +21,7 @@ import {
 import { EmailAdapter } from '../adapters/email.adapter';
 import { AccessTokenStrategy } from './strategies/accessToken.strategy';
 import { RefreshTokenStrategy } from './strategies/refreshToken.strategy';
+import { BasicStrategy } from './strategies/basic.strategy';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { RefreshTokenStrategy } from './strategies/refreshToken.strategy';
   ],
   providers: [
     AuthService,
+    BasicStrategy,
     LocalStrategy,
     AccessTokenStrategy,
     RefreshTokenStrategy,
