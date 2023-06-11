@@ -93,4 +93,15 @@ export class UsersQueryRepository {
       createdAt: user.createdAt,
     };
   }
+
+  async getInfoAboutUser(userId: string) {
+    const user = await this.UserModel.findById(userId);
+    if (!user) return null;
+
+    return {
+      login: user.login,
+      email: user.email,
+      userId,
+    };
+  }
 }

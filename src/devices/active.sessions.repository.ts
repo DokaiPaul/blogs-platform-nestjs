@@ -13,4 +13,26 @@ export class ActiveSessionRepository {
   async addDevice(newDevice: ActiveSessionModel) {
     return this.ActiveSessionModel.create(newDevice);
   }
+
+  async findDeviceById(deviceId: string) {
+    return this.ActiveSessionModel.findOne({ deviceId: deviceId });
+  }
+
+  async save(currentRJWT: ActiveSessionDocument) {
+    try {
+      await currentRJWT.save();
+      return true;
+    } catch (e) {
+      console.error(e);
+      return false;
+    }
+  }
+
+  async deleteDeviceById(deviceId: string) {
+    const result = await this.ActiveSessionModel.deleteOne({
+      deviceId: deviceId,
+    });
+
+    return result.deletedCount === 1;
+  }
 }

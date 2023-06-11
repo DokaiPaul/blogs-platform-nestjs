@@ -14,7 +14,7 @@ export class ActiveSession {
   @Prop({ required: true })
   lastActivateDate: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, unique: true })
   deviceId: string;
 
   @Prop({ required: true })

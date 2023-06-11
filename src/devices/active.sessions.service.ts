@@ -16,4 +16,23 @@ export class ActiveSessionService {
 
     return result;
   }
+
+  async updateRefreshToken(refreshToken: JwtPayload) {
+    const currentRJWT = await this.ActiveSessionRepository.findDeviceById(
+      refreshToken.deviceId,
+    );
+    if (!currentRJWT) return null;
+
+    const newLastActiveDate = new Date(
+      new Date(0).setUTCSeconds(refreshToken.iat),
+    ).toISOString();
+    const newTokenExpirationDate = new Date(
+      new Date(0).setUTCSeconds(refreshToken.exp),
+    ).toISOString();
+
+    currentRJWT.lastActivateDate = newLastActiveDate;
+    currentRJWT.tokenExpirationDate = newTokenExpirationDate;
+
+    return this.ActiveSessionRepository.save(currentRJWT);
+  }
 }

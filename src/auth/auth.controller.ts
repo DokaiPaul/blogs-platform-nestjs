@@ -20,12 +20,15 @@ import {
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { AccessTokenGuard } from './guards/accessToken.guard';
+import { RefreshTokenGuard } from './guards/refreshToken.guard';
+import { UsersQueryRepository } from '../users/infrastructure/users.query.repository';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private UserService: UsersService,
     private AuthService: AuthService,
+    private UserQueryRepository: UsersQueryRepository,
   ) {}
 
   @Post('registration')
@@ -73,14 +76,13 @@ export class AuthController {
     return;
   }
 
-  //todo complete three endpoints below and last endpoint at the bottom
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@Body() credentials, @Res() res, @Req() req, @Headers() headers) {
     const ip = headers['x-forwarded-for'] || req.socket.remoteAddress;
-    const title = headers['user-agent'];
+    const title = headers['user-agent'] ?? 'unknown';
 
-    if (!req.user || !ip || !title) throw new InternalServerErrorException();
+    if (!req.user || !ip) throw new InternalServerErrorException();
 
     const result = await this.AuthService.login(req.user, ip, title);
     if (!result) throw new InternalServerErrorException();
@@ -94,14 +96,35 @@ export class AuthController {
     return;
   }
 
+  @UseGuards(RefreshTokenGuard)
   @Post('logout')
   @HttpCode(204)
-  async logout() {
+  async logout(@Req() req) {
+    await this.AuthService.logout(req.user.deviceId);
+
     return;
   }
 
+  @UseGuards(RefreshTokenGuard)
   @Post('refresh-token')
-  async refreshToken(@Body('accessToken') jwt) {
+  async refreshToken(@Req() req, @Res() res) {
+    const userId = req.user.userId;
+    const deviceId = req.user.deviceId;
+    const newTokens = await this.AuthService.generateTokens(userId, deviceId);
+    if (!newTokens) throw new InternalServerErrorException();
+
+    const isUpdated = this.AuthService.updateRefreshToken(
+      newTokens.refreshToken,
+    );
+    if (!isUpdated) throw new InternalServerErrorException();
+
+    res
+      .cookie('refreshToken', newTokens.refreshToken, {
+        httpOnly: true,
+        secure: true,
+      })
+      .json({ accessToken: newTokens.accessToken });
+
     return;
   }
 
@@ -129,10 +152,11 @@ export class AuthController {
   @UseGuards(AccessTokenGuard)
   @Get('me')
   async getInfoAboutMe(@Req() req: any) {
-    return {
-      email: 'string',
-      login: 'string',
-      userId: req.user,
-    };
+    const infoAboutUser = await this.UserQueryRepository.getInfoAboutUser(
+      req.user.userId,
+    );
+    if (!infoAboutUser) throw new InternalServerErrorException();
+
+    return infoAboutUser;
   }
 }
