@@ -5,11 +5,14 @@ import {
   HttpExceptionFilter,
   validationPipesOptions,
 } from './exception.filter';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors();
+
+  app.use(cookieParser());
 
   app.useGlobalPipes(new ValidationPipe(validationPipesOptions));
   app.useGlobalFilters(new HttpExceptionFilter());
