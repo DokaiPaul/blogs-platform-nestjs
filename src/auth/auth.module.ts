@@ -3,7 +3,6 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { LocalStrategy } from './strategies/local.strategy';
-import { JwtStrategy } from './strategies/jwt.strategy';
 import { UsersService } from '../users/application/users.service';
 import { UsersRepository } from '../users/infrastructure/users.repository';
 import { ActiveSessionService } from '../devices/active.sessions.service';
@@ -20,6 +19,8 @@ import {
   ActiveSessionSchema,
 } from '../devices/active.sessions.model';
 import { EmailAdapter } from '../adapters/email.adapter';
+import { AccessTokenStrategy } from './strategies/accessToken.strategy';
+import { RefreshTokenStrategy } from './strategies/refreshToken.strategy';
 
 @Module({
   imports: [
@@ -36,7 +37,8 @@ import { EmailAdapter } from '../adapters/email.adapter';
   providers: [
     AuthService,
     LocalStrategy,
-    JwtStrategy,
+    AccessTokenStrategy,
+    RefreshTokenStrategy,
     UsersService,
     UsersRepository,
     ActiveSessionService,

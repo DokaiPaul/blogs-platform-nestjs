@@ -19,6 +19,7 @@ import {
 } from '../users/application/dto/password.recovery.input.model';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
+import { AccessTokenGuard } from './guards/accessToken.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -125,12 +126,13 @@ export class AuthController {
     return;
   }
 
+  @UseGuards(AccessTokenGuard)
   @Get('me')
-  async getInfoAboutMe() {
+  async getInfoAboutMe(@Req() req: any) {
     return {
       email: 'string',
       login: 'string',
-      userId: 'string',
+      userId: req.user,
     };
   }
 }
