@@ -10,6 +10,7 @@ import {
   Param,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from '../application/users.service';
 import { UsersQueryRepository } from '../infrastructure/users.query.repository';
@@ -17,6 +18,7 @@ import { UserViewModel } from './models/view/user.view.model';
 import { UserInputModel } from './models/input/user.input.model';
 import { QueryUserParamsModel } from '../../blogs/api/models/input/query.params.model';
 import { PaginatorViewModel } from '../../blogs/api/models/view/paginator.view.model';
+import { BasicAuthGuard } from '../../auth/guards/basic.guard';
 
 @Controller('users')
 export class UsersController {
@@ -25,6 +27,7 @@ export class UsersController {
     private usersQueryRepository: UsersQueryRepository,
   ) {}
 
+  @UseGuards(BasicAuthGuard)
   @HttpCode(201)
   @Post()
   async createUser(
@@ -47,6 +50,7 @@ export class UsersController {
     return createdUser;
   }
 
+  @UseGuards(BasicAuthGuard)
   @Get()
   async getUser(
     @Query() queryParams: QueryUserParamsModel,
@@ -54,6 +58,7 @@ export class UsersController {
     return await this.usersQueryRepository.getUsers(queryParams);
   }
 
+  @UseGuards(BasicAuthGuard)
   @HttpCode(204)
   @Delete(':id')
   async deleteUser(@Param('id') userId: string) {

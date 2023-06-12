@@ -76,6 +76,7 @@ export class AuthController {
     return;
   }
 
+  @HttpCode(200)
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@Body() credentials, @Res() res, @Req() req, @Headers() headers) {
