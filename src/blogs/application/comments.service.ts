@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { CommentsRepository } from '../infrastructure/comments.repository';
 import { CommentLikeStatusDto } from './dto/set.like.status.dto';
+import { CommentsQueryRepository } from '../infrastructure/comments.query.repository';
 
 @Injectable()
 export class CommentsService {
-  constructor(private CommentsRepository: CommentsRepository) {}
+  constructor(
+    private CommentsRepository: CommentsRepository,
+    private CommentsQueryRepository: CommentsQueryRepository,
+  ) {}
 
   async addComment(
     content: string,
@@ -27,7 +31,7 @@ export class CommentsService {
     if (!createdComment) return null;
 
     return {
-      id: createdComment._id,
+      id: createdComment._id.toString(),
       content,
       createdAt: createdComment.createdAt,
       commentatorInfo,
@@ -39,12 +43,36 @@ export class CommentsService {
     };
   }
 
-  async updateComment() {
-    return;
+  async updateComment(updateDto: {
+    userId: string;
+    commentId: string;
+    content: string;
+  }) {
+    const comment = await this.CommentsQueryRepository.getCommentById(
+      updateDto.commentId,
+    );
+    if (!comment) return 'not found';
+    if (comment.commentatorInfo.userId !== updateDto.userId)
+      return 'is not owner';
+
+    const isUpdated = await this.CommentsRepository.updateComment(
+      updateDto.commentId,
+      updateDto.content,
+    );
+    if (!isUpdated) return null;
+
+    return true;
   }
 
-  async deleteComment(commentId: string) {
-    //todo add extracting of user id to determine if the comment belongs to user
+  async deleteComment(commentId: string, userId: string) {
+    const comment = await this.CommentsQueryRepository.getCommentById(
+      commentId,
+      userId,
+    );
+
+    if (!comment) return 'not found';
+    if (comment.commentatorInfo.userId !== userId) return 'is not owner';
+
     const result = await this.CommentsRepository.deleteComment(commentId);
 
     return result.deletedCount === 1;

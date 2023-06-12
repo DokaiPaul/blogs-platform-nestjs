@@ -14,8 +14,17 @@ export class CommentsRepository {
     return this.CommentModel.create(comment);
   }
 
-  async updateComment(commentId: string, body: Comment) {
-    return this.CommentModel.updateOne({ _id: commentId }, { body });
+  async updateComment(commentId: string, content: string) {
+    const comment = await this.CommentModel.findById(commentId);
+    comment.content = content;
+
+    try {
+      comment.save();
+      return true;
+    } catch (e) {
+      console.error(e);
+      return false;
+    }
   }
 
   async deleteComment(commentId: string) {

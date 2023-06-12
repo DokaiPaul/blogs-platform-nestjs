@@ -41,7 +41,7 @@ export class PostsService {
     });
 
     return {
-      id: createdPost._id,
+      id: createdPost._id.toString(),
       ...newPost,
       extendedLikesInfo: {
         likesCount: 0,

@@ -67,7 +67,10 @@ export class CommentsQueryRepository {
       id: comment._id.toString(),
       content: comment.content,
       createdAt: comment.createdAt,
-      commentatorInfo: comment.commentatorInfo,
+      commentatorInfo: {
+        userId: comment.commentatorInfo.userId,
+        userLogin: comment.commentatorInfo.userLogin,
+      },
       likesInfo: {
         likesCount: comment.likes.length,
         dislikesCount: comment.dislikes.length,
@@ -129,7 +132,10 @@ export class CommentsQueryRepository {
         dislikesCount: comment.dislikes.length,
         myStatus,
       },
-      commentatorInfo: comment.commentatorInfo,
+      commentatorInfo: {
+        userId: comment.commentatorInfo.userId,
+        userLogin: comment.commentatorInfo.userLogin,
+      },
     };
   }
 }

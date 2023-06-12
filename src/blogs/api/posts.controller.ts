@@ -22,6 +22,7 @@ import { CommentsService } from '../application/comments.service';
 import { CreateCommentDto } from '../application/dto/create.comment.dto';
 import { JwtService } from '@nestjs/jwt';
 import { UsersQueryRepository } from '../../users/infrastructure/users.query.repository';
+import { AccessTokenGuard } from '../../auth/guards/accessToken.guard';
 
 @Controller('posts')
 export class PostsController {
@@ -47,22 +48,15 @@ export class PostsController {
     return post;
   }
 
-  @UseGuards(BasicAuthGuard)
+  @UseGuards(AccessTokenGuard)
   @HttpCode(201)
   @Post(':id/comments')
   async createCommentInPost(
     @Req() req: any,
     @Body() commentInput: CreateCommentDto,
-    @Param() postId: string,
+    @Param('id') postId: string,
   ) {
-    const refreshToken = req.cookies?.refreshToken;
-    if (!refreshToken) throw new InternalServerErrorException();
-
-    const parsedToken = await this.JwtService.decode(refreshToken);
-    if (typeof parsedToken === 'string')
-      throw new InternalServerErrorException();
-
-    const userId = parsedToken.userId;
+    const userId = req.user.userId;
     const user = await this.UserQueryRepository.getUserById(userId);
     if (!user) throw new InternalServerErrorException();
 
