@@ -8,6 +8,11 @@ export type QueryBlogParamsModel = {
 
 export type QueryPostParamsModel = Omit<QueryBlogParamsModel, 'searchNameTerm'>;
 
+export type QueryCommentParamsModel = Omit<
+  QueryBlogParamsModel,
+  'searchNameTerm'
+>;
+
 export type QueryUserParamsModel = Omit<
   QueryBlogParamsModel,
   'searchNameTerm'

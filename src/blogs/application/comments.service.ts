@@ -6,8 +6,37 @@ import { CommentLikeStatusDto } from './dto/set.like.status.dto';
 export class CommentsService {
   constructor(private CommentsRepository: CommentsRepository) {}
 
-  async addComment() {
-    return;
+  async addComment(
+    content: string,
+    postId: string,
+    commentatorInfo: {
+      userId: string;
+      userLogin: string;
+    },
+  ) {
+    const newComment = {
+      postId,
+      content,
+      commentatorInfo,
+      createdAt: new Date().toISOString(),
+      likes: [],
+      dislikes: [],
+    };
+
+    const createdComment = await this.CommentsRepository.addComment(newComment);
+    if (!createdComment) return null;
+
+    return {
+      id: createdComment._id,
+      content,
+      createdAt: createdComment.createdAt,
+      commentatorInfo,
+      likesInfo: {
+        likesCount: 0,
+        dislikesCount: 0,
+        myStatus: 'None',
+      },
+    };
   }
 
   async updateComment() {
