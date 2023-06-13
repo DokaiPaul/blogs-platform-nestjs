@@ -53,7 +53,6 @@ export class CommentsController {
     return comment;
   }
 
-  //todo complete endpoints below
   @UseGuards(AccessTokenGuard)
   @Put(':id')
   @HttpCode(204)

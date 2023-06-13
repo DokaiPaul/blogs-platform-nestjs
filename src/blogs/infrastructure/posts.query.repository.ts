@@ -15,6 +15,7 @@ export class PostsQueryRepository {
   async getPosts(
     queryParams?: QueryPostParamsModel,
     blogId?: string,
+    userId?: string,
   ): Promise<PaginatorViewModel<PostViewModel | []>> {
     const { sortBy, sorDirection, pageNum, pageSize } =
       this.getQueryParams(queryParams);
@@ -29,7 +30,9 @@ export class PostsQueryRepository {
         .limit(pageSize)
         .skip((pageNum - 1) * pageSize)) ?? []; //return an empty array if there are no required blogs in DB
 
-    const postsToViewModel = posts.map((p) => this.convertToPostView(p)); //todo add user id as param when extract this id form cookeis
+    const postsToViewModel = posts.map((p) =>
+      this.convertToPostView(p, userId),
+    );
 
     const totalMatchedPosts = await this.PostModel.countDocuments(filter);
     const totalPages = Math.ceil(totalMatchedPosts / pageSize);
@@ -45,7 +48,7 @@ export class PostsQueryRepository {
 
   async getPostById(postId: string, userId?: string) {
     const post = await this.PostModel.findById(postId);
-    if (!post) return null;
+    if (!post?._id) return null;
 
     return this.convertToPostView(post, userId);
   }
@@ -94,6 +97,11 @@ export class PostsQueryRepository {
       if (isDisliked) myStatus = LikeStatus.Dislike;
     }
 
+    const newestLikes = post.likes
+      ?.sort((a, b) => Date.parse(b.addedAt) - Date.parse(a.addedAt))
+      .slice(0, 3);
+    newestLikes.forEach((p) => p.addedAt.toString());
+
     return {
       id: post._id.toString(),
       title: post.title,
@@ -106,9 +114,7 @@ export class PostsQueryRepository {
         likesCount: post.likes.length,
         dislikesCount: post.dislikes.length,
         myStatus,
-        newestLikes: post.likes
-          ?.sort((a, b) => Date.parse(b.addedAt) - Date.parse(a.addedAt))
-          .slice(0, 3),
+        newestLikes,
       },
     };
   }

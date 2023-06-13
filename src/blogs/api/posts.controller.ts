@@ -58,6 +58,9 @@ export class PostsController {
     @Body() commentInput: CreateCommentDto,
     @Param('id') postId: string,
   ) {
+    const post = await this.PostsQueryRepository.getPostById(postId);
+    if (!post) throw new NotFoundException();
+
     const userId = req.user.userId;
     const user = await this.UserQueryRepository.getUserById(userId);
     if (!user) throw new InternalServerErrorException();
@@ -77,13 +80,35 @@ export class PostsController {
   }
 
   @Get()
-  async getPosts(@Query() queryParams) {
-    return this.PostsQueryRepository.getPosts(queryParams);
+  async getPosts(@Query() queryParams, @Req() req) {
+    const refreshToken = req.cookies?.refreshToken ?? 'none';
+    let userId;
+
+    if (refreshToken !== 'none') {
+      const parsedToken = await this.JwtService.decode(refreshToken);
+
+      if (typeof parsedToken !== 'string') {
+        userId = parsedToken.userId;
+      }
+    }
+
+    return this.PostsQueryRepository.getPosts(queryParams, null, userId);
   }
 
   @Get(':id')
-  async getPostById(@Param('id') postId: string) {
-    const post = await this.PostsQueryRepository.getPostById(postId);
+  async getPostById(@Param('id') postId: string, @Req() req) {
+    const refreshToken = req.cookies?.refreshToken ?? 'none';
+    let userId;
+
+    if (refreshToken !== 'none') {
+      const parsedToken = await this.JwtService.decode(refreshToken);
+
+      if (typeof parsedToken !== 'string') {
+        userId = parsedToken.userId;
+      }
+    }
+
+    const post = await this.PostsQueryRepository.getPostById(postId, userId);
     if (!post) throw new NotFoundException();
 
     return post;
