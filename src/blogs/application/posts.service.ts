@@ -6,6 +6,7 @@ import { BlogsQueryRepository } from '../infrastructure/blogs.query.repository';
 import { Post, PostDocument } from '../infrastructure/post.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { PostLikeStatusDto } from './dto/set.like.status.dto';
 
 @Injectable()
 export class PostsService {
@@ -76,5 +77,109 @@ export class PostsService {
   async deletePostById(blogId: string) {
     const deletedPost = await this.PostsRepository.deletePostById(blogId);
     return deletedPost.deletedCount === 1;
+  }
+
+  async setLikeStatus(likeDto: PostLikeStatusDto) {
+    const { status, postId, userId } = likeDto;
+    let currentStatus = 'None';
+
+    const isAlreadyLiked = await this.PostsRepository.findLikeByUser({
+      userId,
+      postId,
+    });
+    if (isAlreadyLiked) currentStatus = 'Like';
+
+    const isAlreadyDisliked = await this.PostsRepository.findDislikeByUser({
+      userId,
+      postId,
+    });
+    if (isAlreadyDisliked) currentStatus = 'Dislike';
+
+    if (currentStatus === status) return null;
+
+    if (currentStatus === 'None') {
+      const result = await this.addNewLikeStatus(likeDto);
+      return result;
+    } else {
+      const result = await this.changeCurrentLikeStatus(likeDto);
+      return result;
+    }
+  }
+
+  async addNewLikeStatus({ status, ...dataAboutStatus }: PostLikeStatusDto) {
+    if (status === 'Like') {
+      const result = await this.PostsRepository.addLike(dataAboutStatus);
+      if (!result) return null;
+      return true;
+    }
+    if (status === 'Dislike') {
+      const result = await this.PostsRepository.addDislike(dataAboutStatus);
+      if (!result) return null;
+      return true;
+    }
+
+    return null;
+  }
+
+  async changeCurrentLikeStatus({
+    status,
+    postId,
+    userId,
+    login,
+  }: PostLikeStatusDto) {
+    const addStatusDto = { userId, postId, login };
+    const removeOrFindStatusDto = { userId, postId };
+
+    if (status === 'Like') {
+      const result = await this.PostsRepository.addLike(addStatusDto);
+      if (!result) return null;
+
+      const isRemoved = await this.PostsRepository.removeDislike(
+        removeOrFindStatusDto,
+      );
+      if (!isRemoved) return null;
+
+      return true;
+    }
+
+    if (status === 'Dislike') {
+      const result = await this.PostsRepository.addDislike(addStatusDto);
+      if (!result) return null;
+
+      const isRemoved = await this.PostsRepository.removeLike(
+        removeOrFindStatusDto,
+      );
+      if (!isRemoved) return null;
+
+      return true;
+    }
+
+    if (status === 'None') {
+      const isLiked = await this.PostsRepository.findLikeByUser(
+        removeOrFindStatusDto,
+      );
+      if (isLiked) {
+        const result = await this.PostsRepository.removeLike(
+          removeOrFindStatusDto,
+        );
+        if (!result) return null;
+
+        return true;
+      }
+
+      const isDisliked = await this.PostsRepository.findDislikeByUser(
+        removeOrFindStatusDto,
+      );
+      if (isDisliked) {
+        const result = await this.PostsRepository.removeDislike(
+          removeOrFindStatusDto,
+        );
+        if (!result) return null;
+
+        return true;
+      }
+    }
+
+    return null;
   }
 }

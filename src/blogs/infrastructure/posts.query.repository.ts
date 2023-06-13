@@ -43,11 +43,11 @@ export class PostsQueryRepository {
     };
   }
 
-  async getPostById(postId: string) {
+  async getPostById(postId: string, userId?: string) {
     const post = await this.PostModel.findById(postId);
     if (!post) return null;
 
-    return this.convertToPostView(post);
+    return this.convertToPostView(post, userId);
   }
 
   private getQueryParams(queryParams: QueryPostParamsModel) {

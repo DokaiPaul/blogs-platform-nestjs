@@ -11,6 +11,7 @@ import {
   Put,
   Query,
   Req,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { PostsService } from '../application/posts.service';
@@ -23,6 +24,7 @@ import { CreateCommentDto } from '../application/dto/create.comment.dto';
 import { JwtService } from '@nestjs/jwt';
 import { UsersQueryRepository } from '../../users/infrastructure/users.query.repository';
 import { AccessTokenGuard } from '../../auth/guards/accessToken.guard';
+import { SetLikeStatusDto } from '../application/dto/set.like.status.dto';
 
 @Controller('posts')
 export class PostsController {
@@ -115,6 +117,38 @@ export class PostsController {
     return comments;
   }
 
+  @UseGuards(AccessTokenGuard)
+  @HttpCode(204)
+  @Put(':id/like-status')
+  async updateLikeStatus(
+    @Req() req,
+    @Param('id') postId: string,
+    @Body() status: SetLikeStatusDto,
+  ) {
+    const userId = req?.user.userId;
+
+    if (!userId) throw new UnauthorizedException();
+
+    const user = await this.UserQueryRepository.getUserById(userId);
+    if (!user) throw new InternalServerErrorException();
+
+    const post = await this.PostsQueryRepository.getPostById(postId, userId);
+    if (!post) throw new NotFoundException();
+
+    const likeDto = {
+      status: status.likeStatus,
+      postId,
+      userId,
+      login: user.login,
+    };
+
+    const changedLikeStatus = await this.PostsService.setLikeStatus(likeDto);
+    if (!changedLikeStatus) throw new InternalServerErrorException();
+
+    return;
+  }
+
+  @UseGuards(BasicAuthGuard)
   @HttpCode(204)
   @Put(':id')
   async updatePostById(@Param('id') postId: string, @Body() updatedData) {
@@ -124,6 +158,7 @@ export class PostsController {
     return post;
   }
 
+  @UseGuards(BasicAuthGuard)
   @HttpCode(204)
   @Delete(':id')
   async deletePostById(@Param('id') postId: string) {

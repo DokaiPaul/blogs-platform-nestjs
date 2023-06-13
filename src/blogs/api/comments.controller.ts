@@ -93,8 +93,6 @@ export class CommentsController {
 
     if (!comment) throw new NotFoundException();
     if (!user) throw new InternalServerErrorException();
-    if (comment.commentatorInfo.userId !== user._id.toString())
-      throw new ForbiddenException();
 
     const LikeDTO = {
       status: status.likeStatus,
