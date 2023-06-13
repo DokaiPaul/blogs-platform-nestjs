@@ -4,6 +4,7 @@ import {
   Delete,
   ForbiddenException,
   Get,
+  Headers,
   HttpCode,
   InternalServerErrorException,
   NotFoundException,
@@ -32,11 +33,18 @@ export class CommentsController {
   ) {}
 
   @Get(':id')
-  async getCommentById(@Param('id') commentId: string, @Req() req) {
+  async getCommentById(
+    @Param('id') commentId: string,
+    @Req() req,
+    @Headers('Authorization') authHeader,
+  ) {
     const refreshToken = req.cookies?.refreshToken ?? 'none';
+    const accessToken = authHeader.split(' ')[1];
     let userId;
 
-    if (refreshToken !== 'none') {
+    if (accessToken) {
+      userId = this.JwtService.decode(accessToken).sub;
+    } else if (refreshToken !== 'none') {
       const parsedToken = await this.JwtService.decode(refreshToken);
 
       if (typeof parsedToken !== 'string') {

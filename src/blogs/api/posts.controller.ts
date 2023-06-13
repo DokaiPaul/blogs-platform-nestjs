@@ -1,4 +1,5 @@
 import {
+  Headers,
   Body,
   Controller,
   Delete,
@@ -80,11 +81,18 @@ export class PostsController {
   }
 
   @Get()
-  async getPosts(@Query() queryParams, @Req() req) {
+  async getPosts(
+    @Query() queryParams,
+    @Req() req,
+    @Headers('Authorization') authHeader,
+  ) {
     const refreshToken = req.cookies?.refreshToken ?? 'none';
+    const accessToken = authHeader.split(' ')[1];
     let userId;
 
-    if (refreshToken !== 'none') {
+    if (accessToken) {
+      userId = this.JwtService.decode(accessToken).sub;
+    } else if (refreshToken !== 'none') {
       const parsedToken = await this.JwtService.decode(refreshToken);
 
       if (typeof parsedToken !== 'string') {
@@ -96,11 +104,18 @@ export class PostsController {
   }
 
   @Get(':id')
-  async getPostById(@Param('id') postId: string, @Req() req) {
+  async getPostById(
+    @Param('id') postId: string,
+    @Req() req,
+    @Headers('Authorization') authHeader,
+  ) {
     const refreshToken = req.cookies?.refreshToken ?? 'none';
+    const accessToken = authHeader.split(' ')[1];
     let userId;
 
-    if (refreshToken !== 'none') {
+    if (accessToken) {
+      userId = this.JwtService.decode(accessToken).sub;
+    } else if (refreshToken !== 'none') {
       const parsedToken = await this.JwtService.decode(refreshToken);
 
       if (typeof parsedToken !== 'string') {
@@ -119,15 +134,20 @@ export class PostsController {
     @Param('id') postId: string,
     @Query() queryParams,
     @Req() req,
+    @Headers('Authorization') authHeader,
   ) {
     const post = await this.PostsQueryRepository.getPostById(postId);
     if (!post) throw new NotFoundException();
 
+    const refreshToken = req.cookies?.refreshToken ?? 'none';
+    const accessToken = authHeader.split(' ')[1];
     let userId;
 
-    const refreshToken = req.cookies?.refreshToken;
-    if (refreshToken) {
+    if (accessToken) {
+      userId = this.JwtService.decode(accessToken).sub;
+    } else if (refreshToken !== 'none') {
       const parsedToken = await this.JwtService.decode(refreshToken);
+
       if (typeof parsedToken !== 'string') {
         userId = parsedToken.userId;
       }
