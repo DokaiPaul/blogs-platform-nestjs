@@ -108,8 +108,7 @@ export class CommentsController {
       login: user.login,
     };
 
-    const changedLikeStatus = await this.CommentService.setLikeStatus(LikeDTO);
-    if (!changedLikeStatus) throw new InternalServerErrorException();
+    await this.CommentService.setLikeStatus(LikeDTO);
 
     return;
   }

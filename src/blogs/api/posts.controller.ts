@@ -187,8 +187,7 @@ export class PostsController {
       login: user.login,
     };
 
-    const changedLikeStatus = await this.PostsService.setLikeStatus(likeDto);
-    if (!changedLikeStatus) throw new InternalServerErrorException();
+    await this.PostsService.setLikeStatus(likeDto);
 
     return;
   }
@@ -196,7 +195,10 @@ export class PostsController {
   @UseGuards(BasicAuthGuard)
   @HttpCode(204)
   @Put(':id')
-  async updatePostById(@Param('id') postId: string, @Body() updatedData) {
+  async updatePostById(
+    @Param('id') postId: string,
+    @Body() updatedData: CreatePostWithBlogIdDto,
+  ) {
     const post = await this.PostsService.updatePostById(postId, updatedData);
     if (!post) throw new NotFoundException();
 

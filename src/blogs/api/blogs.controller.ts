@@ -3,12 +3,14 @@ import {
   Controller,
   Delete,
   Get,
+  Headers,
   HttpCode,
   NotFoundException,
   Param,
   Post,
   Put,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { BlogsService } from '../application/blogs.service';
@@ -18,6 +20,7 @@ import { PostsQueryRepository } from '../infrastructure/posts.query.repository';
 import { CreateBlogDto } from '../application/dto/create.blog.dto';
 import { CreatePostDto } from '../application/dto/create.post.dto';
 import { BasicAuthGuard } from '../../auth/guards/basic.guard';
+import { JwtService } from '@nestjs/jwt';
 
 @Controller('blogs')
 export class BlogsController {
@@ -26,6 +29,7 @@ export class BlogsController {
     private BlogsQueryRepository: BlogsQueryRepository,
     private PostsService: PostsService,
     private PostsQueryRepository: PostsQueryRepository,
+    private JwtService: JwtService,
   ) {}
 
   @UseGuards(BasicAuthGuard)
@@ -65,11 +69,34 @@ export class BlogsController {
   }
 
   @Get(':id/posts')
-  async getPostsInBlog(@Param('id') blogId: string, @Query() queryParams) {
+  async getPostsInBlog(
+    @Param('id') blogId: string,
+    @Query() queryParams,
+    @Req() req,
+    @Headers('Authorization') authHeader,
+  ) {
+    const refreshToken = req.cookies?.refreshToken;
+    const accessToken = authHeader?.split(' ')[1];
+    let userId;
+
+    if (accessToken) {
+      userId = this.JwtService.decode(accessToken)?.sub ?? null;
+    } else if (refreshToken) {
+      const parsedToken = await this.JwtService.decode(refreshToken);
+
+      if (typeof parsedToken !== 'string') {
+        userId = parsedToken.userId;
+      }
+    }
+
     const blog = await this.BlogsQueryRepository.getBlogById(blogId);
     if (!blog) throw new NotFoundException();
 
-    const posts = await this.PostsQueryRepository.getPosts(queryParams, blogId);
+    const posts = await this.PostsQueryRepository.getPosts(
+      queryParams,
+      blogId,
+      userId,
+    );
 
     return posts;
   }
