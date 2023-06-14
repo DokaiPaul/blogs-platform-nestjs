@@ -1,6 +1,7 @@
 import { IsMongoId, IsString, Length } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { trimFn } from '../../../utilities/transform.pipes';
+import { IsBlogExist } from '../../../utilities/custom.validators/is.blog.exist';
 
 export class CreatePostDto {
   @IsString()
@@ -22,5 +23,6 @@ export class CreatePostDto {
 export class CreatePostWithBlogIdDto extends CreatePostDto {
   @IsString()
   @IsMongoId()
+  @IsBlogExist()
   blogId: string;
 }
