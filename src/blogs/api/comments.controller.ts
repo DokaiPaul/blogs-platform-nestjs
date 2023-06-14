@@ -38,13 +38,13 @@ export class CommentsController {
     @Req() req,
     @Headers('Authorization') authHeader,
   ) {
-    const refreshToken = req.cookies?.refreshToken ?? 'none';
-    const accessToken = authHeader.split(' ')[1];
+    const refreshToken = req.cookies?.refreshToken;
+    const accessToken = authHeader?.split(' ')[1];
     let userId;
 
     if (accessToken) {
       userId = this.JwtService.decode(accessToken).sub;
-    } else if (refreshToken !== 'none') {
+    } else if (refreshToken) {
       const parsedToken = await this.JwtService.decode(refreshToken);
 
       if (typeof parsedToken !== 'string') {
