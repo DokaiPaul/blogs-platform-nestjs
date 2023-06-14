@@ -38,6 +38,7 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
 import { CommentsRepository } from './blogs/infrastructure/comments.repository';
 import { CommentsService } from './blogs/application/comments.service';
 import { AuthModule } from './auth/auth.module';
+import { IsBlogExistConstraint } from './utilities/custom.validators/is.blog.exist';
 
 @Module({
   imports: [
@@ -83,6 +84,7 @@ import { AuthModule } from './auth/auth.module';
     ActiveSessionService,
     ActiveSessionRepository,
     JwtService,
+    IsBlogExistConstraint,
   ],
 })
 export class AppModule {}

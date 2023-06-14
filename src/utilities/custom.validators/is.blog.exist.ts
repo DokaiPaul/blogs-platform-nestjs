@@ -10,10 +10,10 @@ import { BlogsQueryRepository } from '../../blogs/infrastructure/blogs.query.rep
 @Injectable()
 @ValidatorConstraint({ async: true })
 export class IsBlogExistConstraint implements ValidatorConstraintInterface {
-  constructor(private repo: BlogsQueryRepository) {}
+  constructor(protected readonly blogsRepository: BlogsQueryRepository) {}
 
   public async validate(blogId: string): Promise<boolean> {
-    const blog = await this.repo.getBlogById(blogId);
+    const blog = await this.blogsRepository.getBlogById(blogId);
     if (!blog) return false;
 
     return true;
