@@ -74,8 +74,8 @@ export class AuthService {
     return isUpdated;
   }
 
-  async logout(deviceId: string) {
-    return this.ActiveSessionRepository.deleteDeviceById(deviceId);
+  async logout(deviceId: string, userId: string) {
+    return this.ActiveSessionRepository.deleteDeviceById(deviceId, userId);
   }
 
   async killAllSessions(sessionId: string) {

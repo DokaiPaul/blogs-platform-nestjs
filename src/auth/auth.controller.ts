@@ -101,7 +101,7 @@ export class AuthController {
   @Post('logout')
   @HttpCode(204)
   async logout(@Req() req) {
-    await this.AuthService.logout(req.user.deviceId);
+    await this.AuthService.logout(req.user.deviceId, req.user.userId);
 
     return;
   }

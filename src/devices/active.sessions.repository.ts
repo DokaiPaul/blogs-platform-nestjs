@@ -28,11 +28,39 @@ export class ActiveSessionRepository {
     }
   }
 
-  async deleteDeviceById(deviceId: string) {
+  async deleteDeviceById(deviceId: string, userId: string) {
+    const isDeviceExist = await this.ActiveSessionModel.findById(deviceId);
+    if (!isDeviceExist) return 'not found';
+
+    if (isDeviceExist.userId !== userId) return 'is not owner';
+
     const result = await this.ActiveSessionModel.deleteOne({
       deviceId: deviceId,
     });
 
     return result.deletedCount === 1;
+  }
+
+  async findDevicesByUserId(userId: string) {
+    const sessions = await this.ActiveSessionModel.find({ userId: userId });
+    if (!sessions) return [];
+
+    return sessions.map((s) => {
+      return {
+        ip: s.ip,
+        title: s.title,
+        lastActiveDate: s.lastActivateDate,
+        deviceId: s.deviceId,
+      };
+    });
+  }
+
+  async deleteAllOtherDevices(deviceId: string, userId: string) {
+    const result = await this.ActiveSessionModel.deleteMany({
+      userId: userId,
+      deviceId: { $ne: deviceId },
+    });
+
+    return result.acknowledged;
   }
 }
