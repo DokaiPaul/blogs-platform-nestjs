@@ -39,6 +39,7 @@ import { CommentsRepository } from './blogs/infrastructure/comments.repository';
 import { CommentsService } from './blogs/application/comments.service';
 import { AuthModule } from './auth/auth.module';
 import { IsBlogExistConstraint } from './utilities/custom.validators/is.blog.exist';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -56,6 +57,10 @@ import { IsBlogExistConstraint } from './utilities/custom.validators/is.blog.exi
     ]),
     AuthModule,
     JwtModule.register({}),
+    ThrottlerModule.forRoot({
+      ttl: 10,
+      limit: 5,
+    }),
   ],
   controllers: [
     UsersController,
