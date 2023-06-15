@@ -78,10 +78,6 @@ export class AuthService {
     return this.ActiveSessionRepository.deleteDeviceById(deviceId, userId);
   }
 
-  async killAllSessions(sessionId: string) {
-    return;
-  }
-
   async generateTokens(userId: string, deviceId: string) {
     const accessToken = this.JwtService.sign(
       {

@@ -113,6 +113,7 @@ export class AuthController {
 
   @UseGuards(RefreshTokenGuard)
   @Post('refresh-token')
+  @HttpCode(200)
   async refreshToken(@Req() req, @Res() res) {
     const userId = req.user.userId;
     const deviceId = req.user.deviceId;

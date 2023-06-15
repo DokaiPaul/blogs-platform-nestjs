@@ -48,6 +48,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
         response.status(status).send(`Not found`);
         break;
 
+      case 429:
+        response.status(status).send(`Too much requests. Hold up!`);
+        break;
+
       case 500:
         response.status(status).send('An internal Error has been occurred');
     }
