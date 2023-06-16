@@ -9,19 +9,18 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { RefreshTokenGuard } from '../auth/guards/refreshToken.guard';
 import { ActiveSessionRepository } from './active.sessions.repository';
 
-@Controller('security/devices')
+@Controller('security')
 export class SecurityDevicesController {
   constructor(private sessionRepository: ActiveSessionRepository) {}
 
   @UseGuards(RefreshTokenGuard)
-  @Get()
+  @Get('devices')
   async getDevicesForActiveSession(@Req() req) {
-    const refreshToken = req.user;
-    const userId = refreshToken.userId;
+    const refreshTokenPayload = req.user;
+    const userId = refreshTokenPayload.userId;
 
     const deviceData = await this.sessionRepository.findDevicesByUserId(userId);
 
@@ -29,7 +28,7 @@ export class SecurityDevicesController {
   }
 
   @UseGuards(RefreshTokenGuard)
-  @Delete()
+  @Delete('devices')
   @HttpCode(204)
   async deleteAllDevices(@Req() req) {
     const refreshToken = req.user;
@@ -42,7 +41,7 @@ export class SecurityDevicesController {
   }
 
   @UseGuards(RefreshTokenGuard)
-  @Delete(':id')
+  @Delete('devices/:id')
   @HttpCode(204)
   async deleteDeviceById(@Param('id') deviceId, @Req() req) {
     const refreshToken = req.user;

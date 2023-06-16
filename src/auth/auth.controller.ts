@@ -9,6 +9,7 @@ import {
   Post,
   Req,
   Res,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { UserInputModel } from '../users/api/models/input/user.input.model';
@@ -106,6 +107,9 @@ export class AuthController {
   @Post('logout')
   @HttpCode(204)
   async logout(@Req() req) {
+    if (!req.user?.deviceId || !req.user?.userId)
+      throw new UnauthorizedException();
+
     await this.AuthService.logout(req.user.deviceId, req.user.userId);
 
     return;
