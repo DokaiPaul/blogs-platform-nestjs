@@ -40,6 +40,7 @@ import { CommentsService } from './blogs/application/comments.service';
 import { AuthModule } from './auth/auth.module';
 import { IsBlogExistConstraint } from './utilities/custom.validators/is.blog.exist';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { SecurityDevicesController } from './devices/security.devices.controller';
 
 @Module({
   imports: [
@@ -69,6 +70,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
     CommentsController,
     TestingController,
     AuthController,
+    SecurityDevicesController,
   ],
   providers: [
     UsersService,
