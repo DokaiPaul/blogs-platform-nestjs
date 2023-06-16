@@ -29,7 +29,9 @@ export class ActiveSessionRepository {
   }
 
   async deleteDeviceById(deviceId: string, userId: string) {
-    const isDeviceExist = await this.ActiveSessionModel.findById(deviceId);
+    const isDeviceExist = await this.ActiveSessionModel.findOne({
+      deviceId: deviceId,
+    });
     if (!isDeviceExist) return 'not found';
 
     if (isDeviceExist.userId !== userId) return 'is not owner';
