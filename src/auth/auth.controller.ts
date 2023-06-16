@@ -81,9 +81,8 @@ export class AuthController {
     return;
   }
 
-  @UseGuards(ThrottlerGuard)
+  @UseGuards(ThrottlerGuard, LocalAuthGuard)
   @HttpCode(200)
-  @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@Body() credentials, @Res() res, @Req() req, @Headers() headers) {
     const ip = headers['x-forwarded-for'] || req.socket.remoteAddress;
