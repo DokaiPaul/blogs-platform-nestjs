@@ -6,6 +6,7 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { Response } from 'express';
+import { ValidationError } from 'class-validator';
 
 @Catch(Error)
 export class ErrorExceptionFilter implements ExceptionFilter {
@@ -60,7 +61,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
 export const validationPipesOptions = {
   stopAtFirstError: true,
-  exceptionFactory(errors) {
+  exceptionFactory: (errors: ValidationError[]): void => {
     const errorsInfo = [];
     errors.forEach((e) => {
       const firstMessage = Object.keys(e.constraints)[0];
