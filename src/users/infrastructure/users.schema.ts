@@ -14,6 +14,18 @@ export class EmailConfirmation {
 }
 
 @Schema()
+export class BanInfo {
+  @Prop({ required: true })
+  isBanned: boolean;
+
+  @Prop()
+  banDate: string | null;
+
+  @Prop()
+  banReason: string | null;
+}
+
+@Schema()
 export class User {
   @Prop({ required: true, unique: true })
   login: string;
@@ -29,6 +41,9 @@ export class User {
 
   @Prop({ required: true })
   emailConfirmation: EmailConfirmation;
+
+  @Prop({ required: true })
+  banInfo: BanInfo;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

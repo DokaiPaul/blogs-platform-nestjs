@@ -29,6 +29,14 @@ export class UsersRepository {
     return this.UserModel.findOne({ email: email });
   }
 
+  async findUserByEmailOrLogin(
+    searchTerm: string,
+  ): Promise<UserDocument | null> {
+    return this.UserModel.findOne({
+      $or: [{ email: searchTerm }, { login: searchTerm }],
+    });
+  }
+
   async deleteUser(userId) {
     return this.UserModel.deleteOne({ _id: new ObjectId(userId) });
   }
@@ -51,14 +59,6 @@ export class UsersRepository {
       console.error(e);
       return null;
     }
-  }
-
-  async findUserByEmailOrLogin(
-    searchTerm: string,
-  ): Promise<UserDocument | null> {
-    return this.UserModel.findOne({
-      $or: [{ email: searchTerm }, { login: searchTerm }],
-    });
   }
 
   async updateConfirmationCode(
@@ -121,9 +121,15 @@ export class UsersRepository {
     }
   }
 
-  async findUserByLoginOrEmail(loginOrEmail: string) {
-    return this.UserModel.findOne({
-      $or: [{ email: loginOrEmail }, { login: loginOrEmail }],
-    });
+  async save(repository: UserDocument) {
+    try {
+      await repository.save();
+
+      return true;
+    } catch (e) {
+      console.error(e);
+
+      return false;
+    }
   }
 }

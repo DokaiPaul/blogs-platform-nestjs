@@ -37,6 +37,11 @@ export class UsersService {
         expirationDate: add(new Date(), { minutes: 30 }).toISOString(),
         isConfirmed: false,
       },
+      banInfo: {
+        isBanned: false,
+        banDate: null,
+        banReason: null,
+      },
     };
 
     const createdUser = await this.usersRepository.insertUser(user);
@@ -57,6 +62,7 @@ export class UsersService {
       login,
       email,
       createdAt: user.createdAt,
+      banInfo: user.banInfo,
     };
   }
 

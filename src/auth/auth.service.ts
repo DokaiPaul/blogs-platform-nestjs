@@ -20,7 +20,7 @@ export class AuthService {
   ) {}
 
   async validateUser(loginOrEmail: string, password: string) {
-    const user = await this.UserRepository.findUserByLoginOrEmail(loginOrEmail);
+    const user = await this.UserRepository.findUserByEmailOrLogin(loginOrEmail);
 
     if (!user) return null;
 

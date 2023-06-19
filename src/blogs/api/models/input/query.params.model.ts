@@ -17,6 +17,7 @@ export type QueryUserParamsModel = Omit<
   QueryBlogParamsModel,
   'searchNameTerm'
 > & {
+  banStatus?: string;
   searchLoginTerm?: string;
   searchEmailTerm?: string;
 };

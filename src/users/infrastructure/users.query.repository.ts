@@ -18,22 +18,58 @@ export class UsersQueryRepository {
       sortDirection,
       pageSize,
       pageNumber,
+      banStatus,
     } = this.getQueryParams(queryParams);
 
     let filter = {};
     const sort = { [sortBy]: sortDirection as SortOrder };
 
-    if (searchEmailTerm)
-      filter = { email: { $regex: searchEmailTerm, $options: 'i' } };
-    if (searchLoginTerm)
-      filter = { login: { $regex: searchLoginTerm, $options: 'i' } };
-    if (searchEmailTerm && searchLoginTerm)
-      filter = {
-        $or: [
-          { login: { $regex: searchLoginTerm, $options: 'i' } },
-          { email: { $regex: searchEmailTerm, $options: 'i' } },
-        ],
-      };
+    if (banStatus === 'all') {
+      if (searchEmailTerm)
+        filter = { email: { $regex: searchEmailTerm, $options: 'i' } };
+      if (searchLoginTerm)
+        filter = { login: { $regex: searchLoginTerm, $options: 'i' } };
+      if (searchEmailTerm && searchLoginTerm)
+        filter = {
+          $or: [
+            { login: { $regex: searchLoginTerm, $options: 'i' } },
+            { email: { $regex: searchEmailTerm, $options: 'i' } },
+          ],
+        };
+    }
+
+    if (banStatus === 'banned' || 'notBanned') {
+      let status;
+      if (banStatus === 'banned') status = banStatus;
+      if (banStatus === 'notBanned') status = banStatus;
+
+      if (searchEmailTerm)
+        filter = {
+          $and: [
+            { email: { $regex: searchEmailTerm, $options: 'i' } },
+            { 'isBanned.banStatus': [status] },
+          ],
+        };
+      if (searchLoginTerm)
+        filter = {
+          $and: [
+            { login: { $regex: searchEmailTerm, $options: 'i' } },
+            { 'isBanned.banStatus': [status] },
+          ],
+        };
+      if (searchEmailTerm && searchLoginTerm)
+        filter = {
+          $and: [
+            {
+              $or: [
+                { login: { $regex: searchLoginTerm, $options: 'i' } },
+                { email: { $regex: searchEmailTerm, $options: 'i' } },
+              ],
+            },
+            { 'isBanned.banStatus': [status] },
+          ],
+        };
+    }
 
     const users =
       (await this.UserModel.find(filter)
@@ -65,6 +101,7 @@ export class UsersQueryRepository {
     const propertyKeys = ['id', 'login', 'createdAt', 'email'];
 
     let sortBy = 'createdAt';
+    let banStatus = 'all';
     const sortDirection = queryParams.sortDirection ?? 'desc';
     const pageNumber = +queryParams.pageNumber || 1; //if passed param is equal to 0/null or undefined, the default value will be 1
     const pageSize = +queryParams.pageSize || 10; //if passed param is equal to 0/null or undefined, the default value will be 10
@@ -74,6 +111,11 @@ export class UsersQueryRepository {
     if (queryParams.sortBy && propertyKeys.includes(queryParams.sortBy)) {
       sortBy = queryParams.sortBy;
     }
+    if (queryParams.banStatus) {
+      if (queryParams.banStatus === 'banned') banStatus = queryParams.banStatus;
+      if (queryParams.banStatus === 'notBanned')
+        banStatus = queryParams.banStatus;
+    }
 
     return {
       sortBy,
@@ -82,6 +124,7 @@ export class UsersQueryRepository {
       pageSize,
       searchEmailTerm,
       searchLoginTerm,
+      banStatus,
     };
   }
 
@@ -91,6 +134,7 @@ export class UsersQueryRepository {
       login: user.login,
       email: user.email,
       createdAt: user.createdAt,
+      banInfo: user.banInfo,
     };
   }
 
