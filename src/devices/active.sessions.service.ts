@@ -31,4 +31,10 @@ export class ActiveSessionService {
 
     return this.ActiveSessionRepository.save(currentRJWT);
   }
+
+  async deleteAllDevices(userId: string) {
+    const result = await this.ActiveSessionRepository.deleteAllDevices(userId);
+
+    return result;
+  }
 }

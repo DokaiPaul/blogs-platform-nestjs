@@ -88,6 +88,7 @@ export class BlogsQueryRepository {
       websiteUrl: dto.websiteUrl,
       createdAt: dto.createdAt,
       isMembership: dto.isMembership,
+      blogOwnerInfo: dto.blogOwnerInfo,
     };
   }
 }

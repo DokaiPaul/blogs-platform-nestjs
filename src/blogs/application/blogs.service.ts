@@ -17,11 +17,16 @@ export class BlogsService {
   async createBlog(blogData: CreateBlogDto): Promise<BlogViewModel> {
     const { name, websiteUrl, description } = blogData;
 
+    //todo finish code below. It is necessary to paste userId if passed or null if not
     const newBlog = {
       name,
       websiteUrl,
       description,
       createdAt: new Date().toISOString(),
+      blogOwnerInfo: {
+        userId: null,
+        userLogin: null,
+      },
     };
 
     const createdBlog = await this.BlogsRepository.createBlog(newBlog);

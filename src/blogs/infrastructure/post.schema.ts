@@ -29,6 +29,9 @@ export class Post {
 
   @Prop({ required: true })
   dislikes: LikeDetailsViewModel[];
+
+  @Prop({ default: false })
+  isHidden?: boolean;
 }
 
 export const PostSchema = SchemaFactory.createForClass(Post);

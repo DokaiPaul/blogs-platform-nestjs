@@ -65,4 +65,10 @@ export class ActiveSessionRepository {
 
     return result.acknowledged;
   }
+
+  async deleteAllDevices(userId: string) {
+    const result = await this.ActiveSessionModel.deleteMany({ userId: userId });
+
+    return result.acknowledged;
+  }
 }

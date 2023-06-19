@@ -51,7 +51,12 @@ export class CommentsRepository {
     login,
   }: Omit<CommentLikeStatusDto, 'status'>) {
     const comment = await this.CommentModel.findById(commentId);
-    comment.likes.push({ userId, login, addedAt: new Date().toISOString() });
+    comment.likes.push({
+      userId,
+      login,
+      addedAt: new Date().toISOString(),
+      isHidden: false,
+    });
 
     try {
       comment.save();
@@ -68,7 +73,12 @@ export class CommentsRepository {
     login,
   }: Omit<CommentLikeStatusDto, 'status'>) {
     const comment = await this.CommentModel.findById(commentId);
-    comment.dislikes.push({ userId, login, addedAt: new Date().toISOString() });
+    comment.dislikes.push({
+      userId,
+      login,
+      addedAt: new Date().toISOString(),
+      isHidden: false,
+    });
 
     try {
       comment.save();

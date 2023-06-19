@@ -23,6 +23,9 @@ export class Comment {
 
   @Prop({ required: true, type: { userId: String, userLogin: String } })
   commentatorInfo: { userId: string; userLogin: string };
+
+  @Prop({ default: false })
+  isHidden?: boolean;
 }
 
 export const CommentSchema = SchemaFactory.createForClass(Comment);

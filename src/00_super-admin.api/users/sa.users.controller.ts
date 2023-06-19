@@ -21,12 +21,14 @@ import { UsersService } from '../../users/application/users.service';
 import { QueryUserParamsModel } from '../../blogs/api/models/input/query.params.model';
 import { PaginatorViewModel } from '../../blogs/api/models/view/paginator.view.model';
 import { UsersQueryRepository } from '../../users/infrastructure/users.query.repository';
+import { BanUserUseCaseService } from './use-cases/ban-user-use-case.service';
 
 @Controller('sa/users')
 export class SuperAdminUsersController {
   constructor(
     private userService: UsersService,
     private usersQueryRepository: UsersQueryRepository,
+    private banUserUseCaseService: BanUserUseCaseService,
   ) {}
 
   @UseGuards(BasicAuthGuard)
@@ -64,8 +66,17 @@ export class SuperAdminUsersController {
   @UseGuards(BasicAuthGuard)
   @Put(':id/ban')
   @HttpCode(204)
-  async changeBanStatus(@Body() inputDto: BanUserInputDto) {
-    return 'change';
+  async changeBanStatus(
+    @Body() inputDto: BanUserInputDto,
+    @Param('id') userId: string,
+  ) {
+    const result = await this.banUserUseCaseService.setBanStatusByUserId(
+      userId,
+      inputDto,
+    );
+    if (!result) throw new InternalServerErrorException();
+
+    return;
   }
 
   @UseGuards(BasicAuthGuard)

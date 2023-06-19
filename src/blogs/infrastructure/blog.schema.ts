@@ -5,6 +5,15 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 export type BlogDocument = HydratedDocument<BlogViewModel>;
 
 @Schema()
+export class BlogOwnerInfo {
+  @Prop()
+  userId: string | null;
+
+  @Prop()
+  userLogin: string | null;
+}
+
+@Schema()
 export class Blog {
   @Prop({ required: true })
   name: string;
@@ -20,6 +29,12 @@ export class Blog {
 
   @Prop({ default: false })
   isMembership: boolean;
+
+  @Prop({ default: false })
+  isHidden?: boolean;
+
+  @Prop({ required: true })
+  blogOwnerInfo: BlogOwnerInfo;
 }
 
 export const BlogSchema = SchemaFactory.createForClass(Blog);

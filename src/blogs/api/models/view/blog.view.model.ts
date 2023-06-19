@@ -1,3 +1,5 @@
+import { BlogOwnerInfo } from '../../../infrastructure/blog.schema';
+
 export type BlogViewModel = {
   id: string;
   name: string;
@@ -5,4 +7,5 @@ export type BlogViewModel = {
   websiteUrl: string;
   createdAt: string;
   isMembership: boolean;
+  blogOwnerInfo: BlogOwnerInfo;
 };

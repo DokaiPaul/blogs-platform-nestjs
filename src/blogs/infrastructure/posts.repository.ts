@@ -24,7 +24,12 @@ export class PostsRepository {
 
   async addLike({ postId, userId, login }: Omit<PostLikeStatusDto, 'status'>) {
     const post = await this.PostModel.findById(postId);
-    post.likes.push({ userId, login, addedAt: new Date().toISOString() });
+    post.likes.push({
+      userId,
+      login,
+      addedAt: new Date().toISOString(),
+      isHidden: false,
+    });
 
     try {
       post.save();
@@ -40,7 +45,12 @@ export class PostsRepository {
     login,
   }: Omit<PostLikeStatusDto, 'status'>) {
     const post = await this.PostModel.findById(postId);
-    post.dislikes.push({ userId, login, addedAt: new Date().toISOString() });
+    post.dislikes.push({
+      userId,
+      login,
+      addedAt: new Date().toISOString(),
+      isHidden: false,
+    });
 
     try {
       post.save();
@@ -83,5 +93,36 @@ export class PostsRepository {
       _id: new Object(postId),
       dislikes: { $elemMatch: { userId: userId } },
     });
+  }
+
+  async hideAllPostsByUserId(userId: string) {
+    try {
+      const result = await this.PostModel.updateMany(
+        { userId: userId },
+        { $set: { isHidden: true } },
+      );
+
+      return result.acknowledged;
+    } catch (e) {
+      console.error(e);
+      return false;
+    }
+  }
+
+  async hideAllLikesByUserId(userId: string) {
+    try {
+      const result = await this.PostModel.updateMany(
+        {
+          likes: { $elemMatch: { userId: userId } },
+        },
+        { $set: { 'likes.$[like].isHidden': true } },
+        { arrayFilters: [{ 'like.userId': userId }] },
+      );
+
+      return result.acknowledged;
+    } catch (e) {
+      console.error(e);
+      return false;
+    }
   }
 }

@@ -1,25 +1,76 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { User, UserDocument } from '../../../users/infrastructure/users.schema';
+import {
+  BanInfo,
+  User,
+  UserDocument,
+} from '../../../users/infrastructure/users.schema';
 import { Model } from 'mongoose';
 import { UsersRepository } from '../../../users/infrastructure/users.repository';
+import { BanUserInputDto } from '../dto/ban-user-input.dto';
+import { ActiveSessionService } from '../../../devices/active.sessions.service';
+import { PostsRepository } from '../../../blogs/infrastructure/posts.repository';
 
 @Injectable()
 export class BanUserUseCaseService {
   constructor(
     @InjectModel(User.name) private UserModel: Model<UserDocument>,
     private UserRepository: UsersRepository,
+    private ActiveSessionsService: ActiveSessionService,
+    private PostRepository: PostsRepository,
   ) {}
 
-  async setBanStatusByUserId(userId: string) {}
+  async setBanStatusByUserId(userId: string, banUserDto: BanUserInputDto) {
+    const banInfo = {
+      ...banUserDto,
+      banDate: new Date().toISOString(),
+    };
 
-  private async changeCurrentUserBanStatus(userId: string) {}
+    const isStatusChanged = await this.setCurrentUserBanStatus(userId, banInfo);
+    if (!isStatusChanged) return null;
 
-  private async deleteAllUserActiveSessions(userId: string) {}
+    const isPostsHidden = await this.changeStatusesOfUserPosts(userId);
+    if (!isPostsHidden) return null;
 
-  private async changeStatusesOfUserPosts(userId: string) {}
+    // const isCommentsHidden = await this.changeStatusesOfUserComments(userId);
+    // if (!isCommentsHidden) return null;
 
-  private async changeStatusesOfUserComments(userId: string) {}
+    const isLikesHidden = await this.changeStatusesOfUserLikes(userId);
+    if (!isLikesHidden) return null;
 
-  private async changeStatusesOfUserLikes(userId: string) {}
+    const isSessionsDeleted = await this.deleteAllUserActiveSessions(userId);
+    if (!isSessionsDeleted) return null;
+
+    return true;
+  }
+
+  private async setCurrentUserBanStatus(userId: string, banInfo: BanInfo) {
+    const user = await this.UserModel.findById(userId);
+    user.banInfo = banInfo;
+
+    return this.UserRepository.save(user);
+  }
+
+  private async deleteAllUserActiveSessions(userId: string) {
+    const result = await this.ActiveSessionsService.deleteAllDevices(userId);
+    return result;
+  }
+
+  private async changeStatusesOfUserPosts(userId: string) {
+    const isPostsHidden = await this.PostRepository.hideAllPostsByUserId(
+      userId,
+    );
+    return isPostsHidden;
+  }
+
+  private async changeStatusesOfUserComments(userId: string) {
+    return;
+  }
+
+  private async changeStatusesOfUserLikes(userId: string) {
+    const isPostLikesHidden = await this.PostRepository.hideAllLikesByUserId(
+      userId,
+    );
+    if (!isPostLikesHidden) return null;
+  }
 }

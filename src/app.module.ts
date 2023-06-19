@@ -41,6 +41,8 @@ import { AuthModule } from './auth/auth.module';
 import { IsBlogExistConstraint } from './utilities/custom.validators/is.blog.exist';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { SecurityDevicesController } from './devices/security.devices.controller';
+import { SuperAdminUsersController } from './00_super-admin.api/users/sa.users.controller';
+import { BanUserUseCaseService } from './00_super-admin.api/users/use-cases/ban-user-use-case.service';
 
 @Module({
   imports: [
@@ -71,6 +73,7 @@ import { SecurityDevicesController } from './devices/security.devices.controller
     TestingController,
     AuthController,
     SecurityDevicesController,
+    SuperAdminUsersController,
   ],
   providers: [
     UsersService,
@@ -92,6 +95,7 @@ import { SecurityDevicesController } from './devices/security.devices.controller
     ActiveSessionRepository,
     JwtService,
     IsBlogExistConstraint,
+    BanUserUseCaseService,
   ],
 })
 export class AppModule {}
