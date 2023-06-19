@@ -10,6 +10,7 @@ import { UsersRepository } from '../../../users/infrastructure/users.repository'
 import { BanUserInputDto } from '../dto/ban-user-input.dto';
 import { ActiveSessionService } from '../../../devices/active.sessions.service';
 import { PostsRepository } from '../../../blogs/infrastructure/posts.repository';
+import { CommentsRepository } from '../../../blogs/infrastructure/comments.repository';
 
 @Injectable()
 export class BanUserUseCaseService {
@@ -18,6 +19,7 @@ export class BanUserUseCaseService {
     private UserRepository: UsersRepository,
     private ActiveSessionsService: ActiveSessionService,
     private PostRepository: PostsRepository,
+    private CommentRepository: CommentsRepository,
   ) {}
 
   async setBanStatusByUserId(userId: string, banUserDto: BanUserInputDto) {
@@ -32,8 +34,8 @@ export class BanUserUseCaseService {
     const isPostsHidden = await this.changeStatusesOfUserPosts(userId);
     if (!isPostsHidden) return null;
 
-    // const isCommentsHidden = await this.changeStatusesOfUserComments(userId);
-    // if (!isCommentsHidden) return null;
+    const isCommentsHidden = await this.changeStatusesOfUserComments(userId);
+    if (!isCommentsHidden) return null;
 
     const isLikesHidden = await this.changeStatusesOfUserLikes(userId);
     if (!isLikesHidden) return null;
@@ -64,7 +66,9 @@ export class BanUserUseCaseService {
   }
 
   private async changeStatusesOfUserComments(userId: string) {
-    return;
+    const isCommentsHidden =
+      await this.CommentRepository.hideAllCommentsByUserId(userId);
+    return isCommentsHidden;
   }
 
   private async changeStatusesOfUserLikes(userId: string) {
@@ -72,5 +76,11 @@ export class BanUserUseCaseService {
       userId,
     );
     if (!isPostLikesHidden) return null;
+
+    const isCommentLikesHidden =
+      await this.CommentRepository.hideAllLikesByUserId(userId);
+    if (!isCommentLikesHidden) return null;
+
+    return true;
   }
 }

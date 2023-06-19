@@ -102,4 +102,35 @@ export class CommentsRepository {
       { $pull: { dislikes: { userId: userId } } },
     );
   }
+
+  async hideAllCommentsByUserId(userId: string) {
+    try {
+      const result = await this.CommentModel.updateMany(
+        { userId: userId },
+        { $set: { isHidden: true } },
+      );
+
+      return result.acknowledged;
+    } catch (e) {
+      console.error(e);
+      return false;
+    }
+  }
+
+  async hideAllLikesByUserId(userId: string) {
+    try {
+      const result = await this.CommentModel.updateMany(
+        {
+          likes: { $elemMatch: { userId: userId } },
+        },
+        { $set: { 'likes.$[like].isHidden': true } },
+        { arrayFilters: [{ 'like.userId': userId }] },
+      );
+
+      return result.acknowledged;
+    } catch (e) {
+      console.error(e);
+      return false;
+    }
+  }
 }
