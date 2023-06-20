@@ -22,26 +22,49 @@ export class BanUserUseCaseService {
     private CommentRepository: CommentsRepository,
   ) {}
 
-  async setBanStatusByUserId(userId: string, banUserDto: BanUserInputDto) {
+  async changeBanStatusByUserId(userId: string, banUserDto: BanUserInputDto) {
     const banInfo = {
       ...banUserDto,
       banDate: new Date().toISOString(),
     };
+    let hideStatus = 'hide';
+    if (banUserDto.isBanned === false) hideStatus = 'unhide';
 
     const isStatusChanged = await this.setCurrentUserBanStatus(userId, banInfo);
     if (!isStatusChanged) return null;
 
-    const isPostsHidden = await this.changeStatusesOfUserPosts(userId);
+    const isContentStatusChanged = await this.setHideStatusOfAllContent(
+      userId,
+      hideStatus,
+    );
+    if (!isContentStatusChanged) return null;
+
+    if (banUserDto.isBanned === true) {
+      const isSessionsDeleted = await this.deleteAllUserActiveSessions(userId);
+      if (!isSessionsDeleted) return null;
+    }
+
+    return true;
+  }
+
+  private async setHideStatusOfAllContent(userId: string, hideStatus: string) {
+    const isPostsHidden = await this.changeStatusesOfUserPosts(
+      userId,
+      hideStatus,
+    );
     if (!isPostsHidden) return null;
 
-    const isCommentsHidden = await this.changeStatusesOfUserComments(userId);
+    const isCommentsHidden = await this.changeStatusesOfUserComments(
+      userId,
+      hideStatus,
+    );
     if (!isCommentsHidden) return null;
 
-    const isLikesHidden = await this.changeStatusesOfUserLikes(userId);
+    const isLikesHidden = await this.changeStatusesOfUserLikes(
+      userId,
+      hideStatus,
+    );
     if (!isLikesHidden) return null;
-
-    const isSessionsDeleted = await this.deleteAllUserActiveSessions(userId);
-    if (!isSessionsDeleted) return null;
 
     return true;
   }
@@ -58,27 +81,45 @@ export class BanUserUseCaseService {
     return result;
   }
 
-  private async changeStatusesOfUserPosts(userId: string) {
-    const isPostsHidden = await this.PostRepository.hideAllPostsByUserId(
-      userId,
-    );
+  private async changeStatusesOfUserPosts(userId: string, hideStatus: string) {
+    let isHide = true;
+    if (hideStatus === 'unhide') isHide = false;
+
+    const isPostsHidden =
+      await this.PostRepository.changeHideStatusAllPostsByUserId(
+        userId,
+        isHide,
+      );
     return isPostsHidden;
   }
 
-  private async changeStatusesOfUserComments(userId: string) {
+  private async changeStatusesOfUserComments(
+    userId: string,
+    hideStatus: string,
+  ) {
+    let isHide = true;
+    if (hideStatus === 'unhide') isHide = false;
+
     const isCommentsHidden =
-      await this.CommentRepository.hideAllCommentsByUserId(userId);
+      await this.CommentRepository.changeHideStatusAllCommentsByUserId(
+        userId,
+        isHide,
+      );
     return isCommentsHidden;
   }
 
-  private async changeStatusesOfUserLikes(userId: string) {
+  private async changeStatusesOfUserLikes(userId: string, hideStatus: string) {
+    let isHide = true;
+    if (hideStatus === 'unhide') isHide = false;
+
     const isPostLikesHidden = await this.PostRepository.hideAllLikesByUserId(
       userId,
+      isHide,
     );
     if (!isPostLikesHidden) return null;
 
     const isCommentLikesHidden =
-      await this.CommentRepository.hideAllLikesByUserId(userId);
+      await this.CommentRepository.hideAllLikesByUserId(userId, isHide);
     if (!isCommentLikesHidden) return null;
 
     return true;

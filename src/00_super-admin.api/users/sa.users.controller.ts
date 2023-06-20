@@ -70,7 +70,7 @@ export class SuperAdminUsersController {
     @Body() inputDto: BanUserInputDto,
     @Param('id') userId: string,
   ) {
-    const result = await this.banUserUseCaseService.setBanStatusByUserId(
+    const result = await this.banUserUseCaseService.changeBanStatusByUserId(
       userId,
       inputDto,
     );

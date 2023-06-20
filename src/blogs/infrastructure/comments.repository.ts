@@ -103,11 +103,14 @@ export class CommentsRepository {
     );
   }
 
-  async hideAllCommentsByUserId(userId: string) {
+  async changeHideStatusAllCommentsByUserId(
+    userId: string,
+    hideStatus: boolean,
+  ) {
     try {
       const result = await this.CommentModel.updateMany(
         { userId: userId },
-        { $set: { isHidden: true } },
+        { $set: { isHidden: hideStatus } },
       );
 
       return result.acknowledged;
@@ -117,13 +120,13 @@ export class CommentsRepository {
     }
   }
 
-  async hideAllLikesByUserId(userId: string) {
+  async hideAllLikesByUserId(userId: string, hideStatus: boolean) {
     try {
       const result = await this.CommentModel.updateMany(
         {
           likes: { $elemMatch: { userId: userId } },
         },
-        { $set: { 'likes.$[like].isHidden': true } },
+        { $set: { 'likes.$[like].isHidden': hideStatus } },
         { arrayFilters: [{ 'like.userId': userId }] },
       );
 

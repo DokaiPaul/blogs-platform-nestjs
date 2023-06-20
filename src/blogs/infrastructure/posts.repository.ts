@@ -95,11 +95,11 @@ export class PostsRepository {
     });
   }
 
-  async hideAllPostsByUserId(userId: string) {
+  async changeHideStatusAllPostsByUserId(userId: string, hideStatus: boolean) {
     try {
       const result = await this.PostModel.updateMany(
         { userId: userId },
-        { $set: { isHidden: true } },
+        { $set: { isHidden: hideStatus } },
       );
 
       return result.acknowledged;
@@ -109,13 +109,13 @@ export class PostsRepository {
     }
   }
 
-  async hideAllLikesByUserId(userId: string) {
+  async hideAllLikesByUserId(userId: string, hideStatus: boolean) {
     try {
       const result = await this.PostModel.updateMany(
         {
           likes: { $elemMatch: { userId: userId } },
         },
-        { $set: { 'likes.$[like].isHidden': true } },
+        { $set: { 'likes.$[like].isHidden': hideStatus } },
         { arrayFilters: [{ 'like.userId': userId }] },
       );
 
