@@ -41,7 +41,7 @@ export class BlogsController {
 
   @Get()
   async getBlogs(@Query() queryParams) {
-    return this.BlogsQueryRepository.getBlogs(queryParams);
+    return this.BlogsQueryRepository.getBlogs('Public', queryParams);
   }
 
   @Get(':id')

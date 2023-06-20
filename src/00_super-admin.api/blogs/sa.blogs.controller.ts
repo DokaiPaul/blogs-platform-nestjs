@@ -6,7 +6,7 @@ export class SuperAdminBlogsController {
   @UseGuards(BasicAuthGuard)
   @Get()
   async getBlogs() {
-    return 'some data';
+    return 'Admin';
   }
 
   @UseGuards(BasicAuthGuard)

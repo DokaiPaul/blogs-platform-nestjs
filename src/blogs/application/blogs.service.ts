@@ -14,7 +14,10 @@ export class BlogsService {
   ) {}
   s;
 
-  async createBlog(blogData: CreateBlogDto): Promise<BlogViewModel> {
+  async createBlog(
+    blogData: CreateBlogDto,
+    userId?: string,
+  ): Promise<BlogViewModel> {
     const { name, websiteUrl, description } = blogData;
 
     //todo finish code below. It is necessary to paste userId if passed or null if not
@@ -23,18 +26,20 @@ export class BlogsService {
       websiteUrl,
       description,
       createdAt: new Date().toISOString(),
+      isMembership: false,
       blogOwnerInfo: {
         userId: null,
         userLogin: null,
       },
     };
 
+    const { blogOwnerInfo, ...blogWithoutOwnerInfo } = newBlog;
+
     const createdBlog = await this.BlogsRepository.createBlog(newBlog);
 
     return {
       id: createdBlog._id.toString(),
-      ...newBlog,
-      isMembership: createdBlog.isMembership,
+      ...blogWithoutOwnerInfo,
     };
   }
 

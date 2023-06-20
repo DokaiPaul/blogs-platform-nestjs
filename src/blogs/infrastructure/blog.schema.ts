@@ -1,8 +1,7 @@
 import { HydratedDocument } from 'mongoose';
-import { BlogViewModel } from '../api/models/view/blog.view.model';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-export type BlogDocument = HydratedDocument<BlogViewModel>;
+export type BlogDocument = HydratedDocument<Blog>;
 
 @Schema()
 export class BlogOwnerInfo {

@@ -4,7 +4,10 @@ import { Blog, BlogDocument } from './blog.schema';
 import { Model, SortOrder } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { ObjectId } from 'mongodb';
-import { BlogViewModel } from '../api/models/view/blog.view.model';
+import {
+  BlogViewModel,
+  saBlogViewModel,
+} from '../api/models/view/blog.view.model';
 import { PaginatorViewModel } from '../api/models/view/paginator.view.model';
 
 @Injectable()
@@ -12,6 +15,7 @@ export class BlogsQueryRepository {
   constructor(@InjectModel(Blog.name) private BlogModel: Model<BlogDocument>) {}
 
   async getBlogs(
+    requestBy: string,
     queryParams?: QueryBlogParamsModel,
   ): Promise<PaginatorViewModel<BlogViewModel | []>> {
     const { searchNameTerm, sortBy, sorDirection, pageNum, pageSize } =
@@ -29,7 +33,9 @@ export class BlogsQueryRepository {
         .limit(pageSize)
         .skip((pageNum - 1) * pageSize)) ?? []; //return an empty array if there are no required blogs in DB
 
-    const blogsToViewModel = blogs.map((b) => this.convertToViewBlog(b));
+    const blogsToViewModel = blogs.map((b) =>
+      this.convertToViewBlog(b, requestBy),
+    );
 
     const totalMatchedPosts = await this.BlogModel.countDocuments(filter);
     const totalPages = Math.ceil(totalMatchedPosts / pageSize);
@@ -80,15 +86,28 @@ export class BlogsQueryRepository {
     };
   }
 
-  private convertToViewBlog(dto: Blog & { _id: ObjectId }): BlogViewModel {
-    return {
+  private convertToViewBlog(
+    dto: BlogDocument,
+    userType?: string,
+  ): BlogViewModel | saBlogViewModel {
+    const defaultViewModel = {
       id: dto._id.toString(),
       name: dto.name,
       description: dto.description,
       websiteUrl: dto.websiteUrl,
       createdAt: dto.createdAt,
       isMembership: dto.isMembership,
-      blogOwnerInfo: dto.blogOwnerInfo,
     };
+
+    if (userType === 'Admin')
+      return {
+        ...defaultViewModel,
+        blogOwnerInfo: {
+          userId: dto.blogOwnerInfo.userId,
+          userLogin: dto.blogOwnerInfo.userLogin,
+        },
+      };
+
+    return defaultViewModel;
   }
 }
