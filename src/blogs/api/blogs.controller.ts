@@ -21,6 +21,7 @@ import { CreateBlogDto } from '../application/dto/create.blog.dto';
 import { CreatePostDto } from '../application/dto/create.post.dto';
 import { BasicAuthGuard } from '../../auth/guards/basic.guard';
 import { JwtService } from '@nestjs/jwt';
+import { AccessTokenGuard } from '../../auth/guards/accessToken.guard';
 
 @Controller('blogs')
 export class BlogsController {
@@ -52,17 +53,19 @@ export class BlogsController {
     return blog;
   }
 
-  @UseGuards(BasicAuthGuard)
+  @UseGuards(AccessTokenGuard)
   @Post(':id/posts')
   @HttpCode(201)
   async createPostInBlog(
     @Param('id') blogId: string,
     @Body() postData: CreatePostDto,
+    @Req() req,
   ) {
+    const userId = req.user.userId;
     const blog = await this.BlogsQueryRepository.getBlogById(blogId);
     if (!blog) throw new NotFoundException();
 
-    const post = this.PostsService.createPost(blogId, postData);
+    const post = this.PostsService.createPost(blogId, postData, userId);
     if (!post) throw new NotFoundException();
 
     return post;

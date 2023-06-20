@@ -19,6 +19,7 @@ export class PostsService {
   async createPost(
     blogId: string,
     postData: CreatePostWithBlogIdDto | CreatePostDto,
+    createdBy: string,
   ) {
     const { title, content, shortDescription } = postData;
     const blog = await this.BlogsQueryRepository.getBlogById(blogId);
@@ -33,7 +34,9 @@ export class PostsService {
       blogId,
       blogName,
       createdAt: new Date().toISOString(),
+      userId: createdBy,
     };
+    const { userId, ...postWithoutUserId } = newPost;
 
     const createdPost = await this.PostsRepository.createPost({
       ...newPost,
@@ -43,7 +46,7 @@ export class PostsService {
 
     return {
       id: createdPost._id.toString(),
-      ...newPost,
+      ...postWithoutUserId,
       extendedLikesInfo: {
         likesCount: 0,
         dislikesCount: 0,

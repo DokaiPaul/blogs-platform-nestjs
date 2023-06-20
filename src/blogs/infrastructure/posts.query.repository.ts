@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { PostViewModel } from '../api/models/view/post.view.model';
 import { QueryPostParamsModel } from '../api/models/input/query.params.model';
 import { Post, PostDocument } from './post.schema';
-import { ObjectId } from 'mongodb';
 import { LikeStatus } from '../api/models/view/likes.info.view.model';
 import { PaginatorViewModel } from '../api/models/view/paginator.view.model';
 import { Model, SortOrder } from 'mongoose';
@@ -21,8 +20,8 @@ export class PostsQueryRepository {
       this.getQueryParams(queryParams);
 
     const sort = { [sortBy]: sorDirection as SortOrder };
-    let filter = {};
-    if (blogId) filter = { blogId: blogId }; //set filter to extract posts only for particular blog
+    let filter: any = { isHidden: false };
+    if (blogId) filter = { $and: [{ blogId: blogId }, { isHidden: false }] }; //set filter to extract posts only for particular blog
 
     const posts =
       (await this.PostModel.find(filter)
@@ -47,7 +46,9 @@ export class PostsQueryRepository {
   }
 
   async getPostById(postId: string, userId?: string) {
-    const post = await this.PostModel.findById(postId);
+    const post = await this.PostModel.findOne({
+      $and: [{ _id: postId }, { isHidden: false }],
+    });
     if (!post?._id) return null;
 
     return this.convertToPostView(post, userId);
@@ -81,10 +82,7 @@ export class PostsQueryRepository {
     };
   }
 
-  private convertToPostView(
-    post: Post & { _id: ObjectId },
-    userId?,
-  ): PostViewModel {
+  private convertToPostView(post: PostDocument, userId?): PostViewModel {
     let myStatus = LikeStatus.None;
 
     if (userId) {
@@ -98,9 +96,16 @@ export class PostsQueryRepository {
     }
 
     const newestLikes = post.likes
+      ?.filter((p) => !p.isHidden)
       ?.sort((a, b) => Date.parse(b.addedAt) - Date.parse(a.addedAt))
       .slice(0, 3);
-    newestLikes.forEach((p) => p.addedAt.toString());
+    const processedLikes = newestLikes.map((p) => {
+      return {
+        login: p.login,
+        userId: p.userId,
+        addedAt: p.addedAt.toString(),
+      };
+    });
 
     return {
       id: post._id.toString(),
@@ -111,10 +116,10 @@ export class PostsQueryRepository {
       blogName: post.blogName,
       createdAt: post.createdAt,
       extendedLikesInfo: {
-        likesCount: post.likes.length,
+        likesCount: post.likes.filter((p) => !p.isHidden).length,
         dislikesCount: post.dislikes.length,
         myStatus,
-        newestLikes,
+        newestLikes: processedLikes,
       },
     };
   }

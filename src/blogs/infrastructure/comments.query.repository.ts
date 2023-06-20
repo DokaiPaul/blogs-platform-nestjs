@@ -5,7 +5,6 @@ import { Model, SortOrder } from 'mongoose';
 import { CommentViewModel } from '../api/models/view/comment.view.model';
 import { LikeStatus } from '../api/models/view/likes.info.view.model';
 import { QueryCommentParamsModel } from '../api/models/input/query.params.model';
-import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class CommentsQueryRepository {
@@ -22,8 +21,8 @@ export class CommentsQueryRepository {
       this.getQueryParams(queryParams);
 
     const sort = { [sortBy]: sorDirection as SortOrder };
-    let filter = {};
-    if (postId) filter = { postId: postId }; //if postId is passed
+    let filter: any = { isHidden: false };
+    if (postId) filter = { $and: [{ postId: postId }, { isHidden: false }] }; //if postId is passed
 
     const comments =
       (await this.CommentModel.find(filter)
@@ -51,32 +50,12 @@ export class CommentsQueryRepository {
     commentId: string,
     userId?: string,
   ): Promise<CommentViewModel | null> {
-    const comment = await this.CommentModel.findById(commentId);
+    const comment = await this.CommentModel.findOne({
+      $and: [{ _id: commentId }, { isHidden: false }],
+    });
     if (!comment) return null;
 
-    let myStatus = 'None' as LikeStatus;
-
-    if (userId) {
-      if (comment.likes.find((l) => l.userId === userId))
-        myStatus = 'Like' as LikeStatus;
-      if (comment.dislikes.find((d) => d.userId === userId))
-        myStatus = 'Dislike' as LikeStatus;
-    }
-
-    return {
-      id: comment._id.toString(),
-      content: comment.content,
-      createdAt: comment.createdAt,
-      commentatorInfo: {
-        userId: comment.commentatorInfo.userId,
-        userLogin: comment.commentatorInfo.userLogin,
-      },
-      likesInfo: {
-        likesCount: comment.likes.length,
-        dislikesCount: comment.dislikes.length,
-        myStatus,
-      },
-    };
+    return this.convertToCommentView(comment, userId);
   }
 
   private getQueryParams(queryParams: QueryCommentParamsModel) {
@@ -106,7 +85,7 @@ export class CommentsQueryRepository {
   }
 
   private convertToCommentView(
-    comment: Comment & { _id: ObjectId },
+    comment: CommentDocument,
     userId?,
   ): CommentViewModel {
     let myStatus = LikeStatus.None;
@@ -128,7 +107,7 @@ export class CommentsQueryRepository {
       content: comment.content,
       createdAt: comment.createdAt,
       likesInfo: {
-        likesCount: comment.likes.length,
+        likesCount: comment.likes.filter((c) => !c.isHidden).length,
         dislikesCount: comment.dislikes.length,
         myStatus,
       },

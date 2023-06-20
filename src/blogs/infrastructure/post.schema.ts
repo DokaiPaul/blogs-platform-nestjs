@@ -32,6 +32,9 @@ export class Post {
 
   @Prop({ default: false })
   isHidden?: boolean;
+
+  @Prop({ required: true })
+  userId: string;
 }
 
 export const PostSchema = SchemaFactory.createForClass(Post);

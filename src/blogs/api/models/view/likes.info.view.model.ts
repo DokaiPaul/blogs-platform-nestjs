@@ -15,7 +15,7 @@ export type LikeDetailsViewModel = {
   addedAt: string;
   userId: string;
   login: string;
-  isHidden: boolean;
+  isHidden?: boolean;
 };
 
 export enum LikeStatus {

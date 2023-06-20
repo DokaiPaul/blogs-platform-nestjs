@@ -15,7 +15,9 @@ export class CommentsRepository {
   }
 
   async updateComment(commentId: string, content: string) {
-    const comment = await this.CommentModel.findById(commentId);
+    const comment = await this.CommentModel.findOne({
+      $and: [{ _id: commentId }, { isHidden: false }],
+    });
     comment.content = content;
 
     try {
@@ -28,7 +30,9 @@ export class CommentsRepository {
   }
 
   async deleteComment(commentId: string) {
-    return this.CommentModel.deleteOne({ _id: commentId });
+    return this.CommentModel.deleteOne({
+      $and: [{ _id: commentId }, { isHidden: false }],
+    });
   }
 
   async findLikeByUser({ userId, commentId }) {
@@ -109,7 +113,7 @@ export class CommentsRepository {
   ) {
     try {
       const result = await this.CommentModel.updateMany(
-        { userId: userId },
+        { 'commentatorInfo.userId': userId },
         { $set: { isHidden: hideStatus } },
       );
 

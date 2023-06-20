@@ -38,13 +38,15 @@ export class PostsController {
     private UserQueryRepository: UsersQueryRepository,
   ) {}
 
-  @UseGuards(BasicAuthGuard)
+  @UseGuards(AccessTokenGuard)
   @HttpCode(201)
   @Post()
-  async createPost(@Body() postInput: CreatePostWithBlogIdDto) {
+  async createPost(@Body() postInput: CreatePostWithBlogIdDto, @Req() req) {
+    const userId = req.user.userId;
     const post = await this.PostsService.createPost(
       postInput.blogId,
       postInput,
+      userId,
     );
     if (!post) throw new NotFoundException();
 

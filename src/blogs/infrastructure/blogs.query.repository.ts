@@ -3,7 +3,6 @@ import { QueryBlogParamsModel } from '../api/models/input/query.params.model';
 import { Blog, BlogDocument } from './blog.schema';
 import { Model, SortOrder } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { ObjectId } from 'mongodb';
 import {
   BlogViewModel,
   saBlogViewModel,

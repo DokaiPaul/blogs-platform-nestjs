@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Post, PostDocument } from './post.schema';
 import { Model } from 'mongoose';
-import { ObjectId } from 'mongodb';
 import { PostLikeStatusDto } from '../application/dto/set.like.status.dto';
 
 @Injectable()
@@ -14,8 +13,10 @@ export class PostsRepository {
     return post.save();
   }
 
-  async deletePostById(blogId: string) {
-    return this.PostModel.deleteOne({ _id: new ObjectId(blogId) });
+  async deletePostById(postId: string) {
+    return this.PostModel.deleteOne({
+      $and: [{ _id: postId }, { isHidden: false }],
+    });
   }
 
   async save(post: PostDocument) {
