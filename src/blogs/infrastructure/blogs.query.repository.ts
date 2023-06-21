@@ -48,6 +48,44 @@ export class BlogsQueryRepository {
     };
   }
 
+  async getAllBloggersBlogs(
+    userId: string,
+    queryParams?: QueryBlogParamsModel,
+  ): Promise<PaginatorViewModel<BlogViewModel | []>> {
+    const { searchNameTerm, sortBy, sorDirection, pageNum, pageSize } =
+      this.getQueryParams(queryParams);
+
+    const filter = !searchNameTerm
+      ? { 'blogOwnerInfo.userId': userId } //if search name term is not provided filter is an empty object
+      : {
+          $and: [
+            { name: { $regex: searchNameTerm, $options: 'i' } },
+            { 'blogOwnerInfo.userId': userId },
+          ],
+        };
+
+    const sort = { [sortBy]: sorDirection as SortOrder };
+
+    const blogs =
+      (await this.BlogModel.find(filter)
+        .sort(sort)
+        .limit(pageSize)
+        .skip((pageNum - 1) * pageSize)) ?? []; //return an empty array if there are no required blogs in DB
+
+    const blogsToViewModel = blogs.map((b) => this.convertToViewBlog(b));
+
+    const totalMatchedPosts = await this.BlogModel.countDocuments(filter);
+    const totalPages = Math.ceil(totalMatchedPosts / pageSize);
+
+    return {
+      pagesCount: totalPages,
+      page: pageNum,
+      pageSize: pageSize,
+      totalCount: totalMatchedPosts,
+      items: blogsToViewModel,
+    };
+  }
+
   async getBlogById(blogId: string): Promise<BlogViewModel | null> {
     const blog = await this.BlogModel.findById(blogId);
     if (!blog) return null;

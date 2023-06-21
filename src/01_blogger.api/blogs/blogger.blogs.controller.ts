@@ -8,6 +8,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -18,6 +19,7 @@ import { BlogsQueryRepository } from '../../blogs/infrastructure/blogs.query.rep
 import { PostsService } from '../../blogs/application/posts.service';
 import { CreateBlogDto } from '../../blogs/application/dto/create.blog.dto';
 import { BlogsService } from '../../blogs/application/blogs.service';
+import { QueryBlogParamsModel } from '../../blogs/api/models/input/query.params.model';
 
 @Controller('blogger/blogs')
 export class BloggerBlogsController {
@@ -53,11 +55,18 @@ export class BloggerBlogsController {
     return post;
   }
 
-  //todo complete endpoint below
   @UseGuards(AccessTokenGuard)
   @Get()
-  async getAllBloggersBlogs() {
-    return;
+  async getAllBloggersBlogs(
+    @Req() req,
+    @Query() queryParams: QueryBlogParamsModel,
+  ) {
+    const userId = req?.user?.userId;
+
+    return await this.BlogsQueryRepository.getAllBloggersBlogs(
+      userId,
+      queryParams,
+    );
   }
 
   @UseGuards(AccessTokenGuard)
