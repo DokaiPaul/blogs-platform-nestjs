@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   HttpCode,
   NotFoundException,
@@ -18,13 +19,15 @@ import { CreatePostDto } from '../../blogs/application/dto/create.post.dto';
 import { BlogsQueryRepository } from '../../blogs/infrastructure/blogs.query.repository';
 import { PostsService } from '../../blogs/application/posts.service';
 import { CreateBlogDto } from '../../blogs/application/dto/create.blog.dto';
-import { BlogsService } from '../../blogs/application/blogs.service';
 import { QueryBlogParamsModel } from '../../blogs/api/models/input/query.params.model';
+import { BloggerBlogsService } from './blogger.blogs.service';
+import { BlogsService } from '../../blogs/application/blogs.service';
 
 @Controller('blogger/blogs')
 export class BloggerBlogsController {
   constructor(
     private BlogsService: BlogsService,
+    private BloggersBlogsService: BloggerBlogsService,
     private BlogRepository: BlogsRepository,
     private BlogsQueryRepository: BlogsQueryRepository,
     private PostsService: PostsService,
@@ -75,9 +78,17 @@ export class BloggerBlogsController {
   async updateBlog(
     @Param('id') blogId: string,
     @Body() updatedData: CreateBlogDto,
+    @Req() req,
   ) {
-    const blog = await this.BlogsService.updateBlogById(blogId, updatedData);
-    if (!blog) throw new NotFoundException();
+    const userId = req?.user?.userId;
+
+    const isUpdated = await this.BloggersBlogsService.updateBlog(
+      blogId,
+      updatedData,
+      userId,
+    );
+    if (isUpdated === 'Not found') throw new NotFoundException();
+    if (isUpdated === 'Not owner') throw new ForbiddenException();
 
     return;
   }
@@ -93,9 +104,15 @@ export class BloggerBlogsController {
   @UseGuards(AccessTokenGuard)
   @Delete(':id')
   @HttpCode(204)
-  async deleteBlog(@Param('id') blogId: string) {
-    const isDeleted = await this.BlogsService.deleteBlogById(blogId);
-    if (!isDeleted) throw new NotFoundException();
+  async deleteBlog(@Param('id') blogId: string, @Req() req) {
+    const userId = req?.user?.userId;
+
+    const isDeleted = await this.BloggersBlogsService.deleteBlog(
+      blogId,
+      userId,
+    );
+    if (isDeleted === 'Not found') throw new NotFoundException();
+    if (isDeleted === 'Not owner') throw new ForbiddenException();
 
     return;
   }
