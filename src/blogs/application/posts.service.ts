@@ -65,7 +65,7 @@ export class PostsService {
     updatedPost.title = title;
     updatedPost.content = content;
     updatedPost.shortDescription = shortDescription;
-    updatedPost.blogId = blogId;
+    if (blogId) updatedPost.blogId = blogId;
 
     try {
       await this.PostsRepository.save(updatedPost);

@@ -5,6 +5,7 @@ import {
   ForbiddenException,
   Get,
   HttpCode,
+  InternalServerErrorException,
   NotFoundException,
   Param,
   Post,
@@ -97,11 +98,30 @@ export class BloggerBlogsController {
     return;
   }
 
-  //todo complete endpoint below
   @UseGuards(AccessTokenGuard)
   @Put(':id/posts/:postId')
   @HttpCode(204)
-  async updatePost() {
+  async updatePost(
+    @Body() updateDto: CreatePostDto,
+    @Param('id') blogId: string,
+    @Param('postId') postId: string,
+    @Req() req,
+  ) {
+    const userId = req?.user?.userId;
+
+    const isUserOwner = await this.BloggersBlogsService.isBlogBelongsToUser(
+      blogId,
+      userId,
+    );
+    if (isUserOwner === 'Not found') throw new NotFoundException();
+    if (isUserOwner === 'Not owner') throw new ForbiddenException();
+
+    const isUpdated = await this.PostsService.updatePostById(postId, {
+      ...updateDto,
+      blogId,
+    });
+    if (!isUpdated) throw new InternalServerErrorException();
+
     return;
   }
 
@@ -121,11 +141,26 @@ export class BloggerBlogsController {
     return;
   }
 
-  //todo complete endpoint below
   @UseGuards(AccessTokenGuard)
   @Delete(':id/posts/:postId')
   @HttpCode(204)
-  async deletePost() {
+  async deletePost(
+    @Param('id') blogId: string,
+    @Param('postId') postId: string,
+    @Req() req,
+  ) {
+    const userId = req?.user?.userId;
+
+    const isUserOwner = await this.BloggersBlogsService.isBlogBelongsToUser(
+      blogId,
+      userId,
+    );
+    if (isUserOwner === 'Not found') throw new NotFoundException();
+    if (isUserOwner === 'Not owner') throw new ForbiddenException();
+
+    const isDeleted = await this.PostsService.deletePostById(postId);
+    if (!isDeleted) throw new InternalServerErrorException();
+
     return;
   }
 }
