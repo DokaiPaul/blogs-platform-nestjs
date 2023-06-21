@@ -18,6 +18,12 @@ export class BlogsRepository {
   }
 
   async save(blog: BlogDocument) {
-    await blog.save();
+    try {
+      await blog.save();
+      return true;
+    } catch (e) {
+      console.error(e);
+      return false;
+    }
   }
 }
