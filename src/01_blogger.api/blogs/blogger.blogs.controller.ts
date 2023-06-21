@@ -49,8 +49,12 @@ export class BloggerBlogsController {
     @Req() req,
   ) {
     const userId = req.user.userId;
-    const blog = await this.BlogsQueryRepository.getBlogById(blogId);
-    if (!blog) throw new NotFoundException();
+    const isUserOwner = await this.BloggersBlogsService.isBlogBelongsToUser(
+      blogId,
+      userId,
+    );
+    if (isUserOwner === 'Not found') throw new NotFoundException();
+    if (isUserOwner === 'Not owner') throw new ForbiddenException();
 
     const post = this.PostsService.createPost(blogId, postData, userId);
     if (!post) throw new NotFoundException();

@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 import { Blog, BlogDocument } from '../../blogs/infrastructure/blog.schema';
 import { CreateBlogDto } from '../../blogs/application/dto/create.blog.dto';
 import { BlogsRepository } from '../../blogs/infrastructure/blogs.repository';
+import { CreatePostDto } from '../../blogs/application/dto/create.post.dto';
 
 @Injectable()
 export class BloggerBlogsService {
@@ -12,12 +13,20 @@ export class BloggerBlogsService {
     private BlogsRepository: BlogsRepository,
   ) {}
 
+  async isBlogBelongsToUser(blogId: string, userId: string) {
+    const blog = await this.BlogModel.findById(blogId);
+    if (!blog) return 'Not found';
+    if (blog.blogOwnerInfo.userId !== userId) return 'Not owner';
+
+    return true;
+  }
+
   async updateBlog(blogId: string, updatedData: CreateBlogDto, userId: string) {
     const { websiteUrl, description, name } = updatedData;
 
     const blog = await this.BlogModel.findById(blogId);
     if (!blog) return 'Not found';
-    if (blog) return 'Not owner';
+    if (blog.blogOwnerInfo.userId !== userId) return 'Not owner';
 
     blog.websiteUrl = websiteUrl;
     blog.description = description;
