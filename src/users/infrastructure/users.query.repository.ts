@@ -47,14 +47,14 @@ export class UsersQueryRepository {
         filter = {
           $and: [
             { email: { $regex: searchEmailTerm, $options: 'i' } },
-            { 'isBanned.banStatus': [status] },
+            { 'banInfo.isBanned': [status] },
           ],
         };
       if (searchLoginTerm)
         filter = {
           $and: [
             { login: { $regex: searchEmailTerm, $options: 'i' } },
-            { 'isBanned.banStatus': [status] },
+            { 'banInfo.isBanned': [status] },
           ],
         };
       if (searchEmailTerm && searchLoginTerm)
@@ -66,7 +66,7 @@ export class UsersQueryRepository {
                 { email: { $regex: searchEmailTerm, $options: 'i' } },
               ],
             },
-            { 'isBanned.banStatus': [status] },
+            { 'banInfo.isBanned': [status] },
           ],
         };
     }
@@ -134,7 +134,11 @@ export class UsersQueryRepository {
       login: user.login,
       email: user.email,
       createdAt: user.createdAt,
-      banInfo: user.banInfo,
+      banInfo: {
+        isBanned: user.banInfo.isBanned,
+        banReason: user.banInfo.banReason,
+        banDate: user.banInfo.banDate,
+      },
     };
   }
 

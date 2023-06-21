@@ -5,12 +5,14 @@ import { BlogViewModel } from '../api/models/view/blog.view.model';
 import { Model } from 'mongoose';
 import { Blog, BlogDocument } from '../infrastructure/blog.schema';
 import { InjectModel } from '@nestjs/mongoose';
+import { UsersQueryRepository } from '../../users/infrastructure/users.query.repository';
 
 @Injectable()
 export class BlogsService {
   constructor(
     private BlogsRepository: BlogsRepository,
     @InjectModel(Blog.name) private BlogModel: Model<BlogDocument>,
+    private UserQueryRepository: UsersQueryRepository,
   ) {}
   s;
 
@@ -19,18 +21,25 @@ export class BlogsService {
     userId?: string,
   ): Promise<BlogViewModel> {
     const { name, websiteUrl, description } = blogData;
+    let blogOwnerData = {
+      userId: null,
+      userLogin: null,
+    };
+    if (userId) {
+      let userLogin;
+      const user = await this.UserQueryRepository.getUserById(userId);
+      if (user) userLogin = user.login;
 
-    //todo finish code below. It is necessary to paste userId if passed or null if not
+      blogOwnerData = { userId, userLogin };
+    }
+
     const newBlog = {
       name,
       websiteUrl,
       description,
       createdAt: new Date().toISOString(),
       isMembership: false,
-      blogOwnerInfo: {
-        userId: null,
-        userLogin: null,
-      },
+      blogOwnerInfo: blogOwnerData,
     };
 
     const { blogOwnerInfo, ...blogWithoutOwnerInfo } = newBlog;

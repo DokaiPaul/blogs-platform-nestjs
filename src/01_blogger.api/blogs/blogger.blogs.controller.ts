@@ -37,8 +37,10 @@ export class BloggerBlogsController {
   @UseGuards(AccessTokenGuard)
   @Post()
   @HttpCode(201)
-  async createNewBlog(@Body() blogData: CreateBlogDto) {
-    return this.BlogsService.createBlog(blogData);
+  async createNewBlog(@Body() blogData: CreateBlogDto, @Req() req) {
+    const userId = req?.user?.userId;
+
+    return this.BlogsService.createBlog(blogData, userId);
   }
 
   @UseGuards(AccessTokenGuard)
