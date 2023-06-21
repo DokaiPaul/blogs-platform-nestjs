@@ -39,10 +39,12 @@ import { CommentsRepository } from './blogs/infrastructure/comments.repository';
 import { CommentsService } from './blogs/application/comments.service';
 import { AuthModule } from './auth/auth.module';
 import { IsBlogExistConstraint } from './utilities/custom.validators/is.blog.exist';
-import { ThrottlerModule } from '@nestjs/throttler';
 import { SecurityDevicesController } from './devices/security.devices.controller';
 import { SuperAdminUsersController } from './00_super-admin.api/users/sa.users.controller';
 import { BanUserUseCaseService } from './00_super-admin.api/users/use-cases/ban-user-use-case.service';
+import { BloggerBlogsController } from './01_blogger.api/blogs/blogger.blogs.controller';
+import { BloggerBlogsService } from './01_blogger.api/blogs/blogger.blogs.service';
+import { SaBlogsService } from './00_super-admin.api/blogs/sa.blogs.service';
 
 @Module({
   imports: [
@@ -60,10 +62,6 @@ import { BanUserUseCaseService } from './00_super-admin.api/users/use-cases/ban-
     ]),
     AuthModule,
     JwtModule.register({}),
-    ThrottlerModule.forRoot({
-      ttl: 10,
-      limit: 5,
-    }),
   ],
   controllers: [
     UsersController,
@@ -74,6 +72,8 @@ import { BanUserUseCaseService } from './00_super-admin.api/users/use-cases/ban-
     AuthController,
     SecurityDevicesController,
     SuperAdminUsersController,
+    SuperAdminUsersController,
+    BloggerBlogsController,
   ],
   providers: [
     UsersService,
@@ -96,6 +96,8 @@ import { BanUserUseCaseService } from './00_super-admin.api/users/use-cases/ban-
     JwtService,
     IsBlogExistConstraint,
     BanUserUseCaseService,
+    SaBlogsService,
+    BloggerBlogsService,
   ],
 })
 export class AppModule {}

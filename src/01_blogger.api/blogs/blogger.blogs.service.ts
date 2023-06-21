@@ -4,7 +4,6 @@ import { Model } from 'mongoose';
 import { Blog, BlogDocument } from '../../blogs/infrastructure/blog.schema';
 import { CreateBlogDto } from '../../blogs/application/dto/create.blog.dto';
 import { BlogsRepository } from '../../blogs/infrastructure/blogs.repository';
-import { CreatePostDto } from '../../blogs/application/dto/create.post.dto';
 
 @Injectable()
 export class BloggerBlogsService {

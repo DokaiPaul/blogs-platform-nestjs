@@ -23,7 +23,6 @@ import { LocalAuthGuard } from './guards/local-auth.guard';
 import { AccessTokenGuard } from './guards/accessToken.guard';
 import { RefreshTokenGuard } from './guards/refreshToken.guard';
 import { UsersQueryRepository } from '../users/infrastructure/users.query.repository';
-import { ThrottlerGuard } from '@nestjs/throttler';
 
 @Controller('auth')
 export class AuthController {
@@ -33,7 +32,6 @@ export class AuthController {
     private UserQueryRepository: UsersQueryRepository,
   ) {}
 
-  @UseGuards(ThrottlerGuard)
   @Post('registration')
   @HttpCode(204)
   async registerNewUser(@Body() userData: UserInputModel) {
@@ -53,7 +51,6 @@ export class AuthController {
     return;
   }
 
-  @UseGuards(ThrottlerGuard)
   @Post('registration-confirmation')
   @HttpCode(204)
   async confirmRegistration(@Body('code') confirmationCode: string) {
@@ -68,7 +65,6 @@ export class AuthController {
     return;
   }
 
-  @UseGuards(ThrottlerGuard)
   @Post('registration-email-resending')
   @HttpCode(204)
   async registrationResending(@Body('email') email) {
@@ -81,7 +77,7 @@ export class AuthController {
     return;
   }
 
-  @UseGuards(ThrottlerGuard, LocalAuthGuard)
+  @UseGuards(LocalAuthGuard)
   @HttpCode(200)
   @Post('login')
   async login(@Body() credentials, @Res() res, @Req() req, @Headers() headers) {
@@ -138,7 +134,6 @@ export class AuthController {
     return;
   }
 
-  @UseGuards(ThrottlerGuard)
   @Post('password-recovery')
   @HttpCode(204)
   async passwordRecovery(@Body('email') email: PasswordRecoveryInputModel) {
@@ -147,7 +142,6 @@ export class AuthController {
     return;
   }
 
-  @UseGuards(ThrottlerGuard)
   @Post('new-password')
   @HttpCode(204)
   async setNewPassword(@Body() newPassAndCode: NewPasswordRecoveryInputModel) {
