@@ -62,7 +62,6 @@ export class SuperAdminUsersController {
     return await this.usersQueryRepository.getUsers(queryParams);
   }
 
-  //todo complete the endpoint below
   @UseGuards(BasicAuthGuard)
   @Put(':id/ban')
   @HttpCode(204)

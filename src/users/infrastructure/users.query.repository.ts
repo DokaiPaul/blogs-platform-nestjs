@@ -40,8 +40,8 @@ export class UsersQueryRepository {
 
     if (banStatus === 'banned' || 'notBanned') {
       let status;
-      if (banStatus === 'banned') status = banStatus;
-      if (banStatus === 'notBanned') status = banStatus;
+      if (banStatus === 'banned') status = true;
+      if (banStatus === 'notBanned') status = false;
 
       if (searchEmailTerm)
         filter = {
