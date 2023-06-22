@@ -24,25 +24,25 @@ export class UsersQueryRepository {
     let filter = {};
     const sort = { [sortBy]: sortDirection as SortOrder };
 
-    if (banStatus === 'all') {
-      if (searchEmailTerm)
-        filter = { email: { $regex: searchEmailTerm, $options: 'i' } };
-      if (searchLoginTerm)
-        filter = { login: { $regex: searchLoginTerm, $options: 'i' } };
-      if (searchEmailTerm && searchLoginTerm)
-        filter = {
-          $and: [
-            { login: { $regex: searchLoginTerm, $options: 'i' } },
-            { email: { $regex: searchEmailTerm, $options: 'i' } },
-          ],
-        };
-    }
+    if (searchEmailTerm)
+      filter = { email: { $regex: searchEmailTerm, $options: 'i' } };
+    if (searchLoginTerm)
+      filter = { login: { $regex: searchLoginTerm, $options: 'i' } };
+    if (searchEmailTerm && searchLoginTerm)
+      filter = {
+        $or: [
+          { login: { $regex: searchLoginTerm, $options: 'i' } },
+          { email: { $regex: searchEmailTerm, $options: 'i' } },
+        ],
+      };
 
     if (banStatus === 'banned' || 'notBanned') {
       let status;
       if (banStatus === 'banned') status = true;
       if (banStatus === 'notBanned') status = false;
-
+      filter = {
+        'banInfo.isBanned': status,
+      };
       if (searchEmailTerm)
         filter = {
           $and: [
@@ -53,7 +53,7 @@ export class UsersQueryRepository {
       if (searchLoginTerm)
         filter = {
           $and: [
-            { login: { $regex: searchEmailTerm, $options: 'i' } },
+            { login: { $regex: searchLoginTerm, $options: 'i' } },
             { 'banInfo.isBanned': status },
           ],
         };
@@ -61,7 +61,7 @@ export class UsersQueryRepository {
         filter = {
           $and: [
             {
-              $and: [
+              $or: [
                 { login: { $regex: searchLoginTerm, $options: 'i' } },
                 { email: { $regex: searchEmailTerm, $options: 'i' } },
               ],

@@ -5,7 +5,6 @@ import {
   ForbiddenException,
   Get,
   HttpCode,
-  InternalServerErrorException,
   NotFoundException,
   Param,
   Post,
@@ -122,7 +121,7 @@ export class BloggerBlogsController {
       ...updateDto,
       blogId,
     });
-    if (!isUpdated) throw new InternalServerErrorException();
+    if (!isUpdated) throw new NotFoundException();
 
     return;
   }
