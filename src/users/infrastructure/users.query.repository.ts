@@ -31,7 +31,7 @@ export class UsersQueryRepository {
         filter = { login: { $regex: searchLoginTerm, $options: 'i' } };
       if (searchEmailTerm && searchLoginTerm)
         filter = {
-          $or: [
+          $and: [
             { login: { $regex: searchLoginTerm, $options: 'i' } },
             { email: { $regex: searchEmailTerm, $options: 'i' } },
           ],
@@ -47,26 +47,26 @@ export class UsersQueryRepository {
         filter = {
           $and: [
             { email: { $regex: searchEmailTerm, $options: 'i' } },
-            { 'banInfo.isBanned': [status] },
+            { 'banInfo.isBanned': status },
           ],
         };
       if (searchLoginTerm)
         filter = {
           $and: [
             { login: { $regex: searchEmailTerm, $options: 'i' } },
-            { 'banInfo.isBanned': [status] },
+            { 'banInfo.isBanned': status },
           ],
         };
       if (searchEmailTerm && searchLoginTerm)
         filter = {
           $and: [
             {
-              $or: [
+              $and: [
                 { login: { $regex: searchLoginTerm, $options: 'i' } },
                 { email: { $regex: searchEmailTerm, $options: 'i' } },
               ],
             },
-            { 'banInfo.isBanned': [status] },
+            { 'banInfo.isBanned': status },
           ],
         };
     }
