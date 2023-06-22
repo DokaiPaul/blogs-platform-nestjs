@@ -8,6 +8,6 @@ export class BanUserInputDto {
 
   @IsString()
   @Transform(trimFn)
-  @Length(1, 1000)
+  @Length(20, 1000)
   banReason: string;
 }

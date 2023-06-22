@@ -70,6 +70,10 @@ export class BanUserUseCaseService {
   private async setCurrentUserBanStatus(userId: string, banInfo: BanInfo) {
     const user = await this.UserModel.findById(userId);
     user.banInfo = banInfo;
+    if (!user.banInfo.isBanned) {
+      user.banInfo.banDate = null;
+      user.banInfo.banReason = null;
+    }
 
     return this.UserRepository.save(user);
   }
