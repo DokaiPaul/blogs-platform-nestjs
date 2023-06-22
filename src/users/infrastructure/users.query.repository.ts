@@ -36,13 +36,11 @@ export class UsersQueryRepository {
         ],
       };
 
-    if (banStatus === 'banned' || 'notBanned') {
+    if (banStatus === 'banned' || banStatus === 'notBanned') {
       let status;
       if (banStatus === 'banned') status = true;
       if (banStatus === 'notBanned') status = false;
-      filter = {
-        'banInfo.isBanned': status,
-      };
+      filter = { 'banInfo.isBanned': status };
       if (searchEmailTerm)
         filter = {
           $and: [
