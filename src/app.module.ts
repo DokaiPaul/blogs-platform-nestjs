@@ -45,6 +45,7 @@ import { BanUserUseCaseService } from './00_super-admin.api/users/use-cases/ban-
 import { BloggerBlogsController } from './01_blogger.api/blogs/blogger.blogs.controller';
 import { BloggerBlogsService } from './01_blogger.api/blogs/blogger.blogs.service';
 import { SaBlogsService } from './00_super-admin.api/blogs/sa.blogs.service';
+import { SuperAdminBlogsController } from './00_super-admin.api/blogs/sa.blogs.controller';
 
 @Module({
   imports: [
@@ -72,7 +73,7 @@ import { SaBlogsService } from './00_super-admin.api/blogs/sa.blogs.service';
     AuthController,
     SecurityDevicesController,
     SuperAdminUsersController,
-    SuperAdminUsersController,
+    SuperAdminBlogsController,
     BloggerBlogsController,
   ],
   providers: [

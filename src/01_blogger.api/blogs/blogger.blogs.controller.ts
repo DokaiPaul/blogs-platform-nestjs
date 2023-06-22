@@ -161,7 +161,7 @@ export class BloggerBlogsController {
     if (isUserOwner === 'Not owner') throw new ForbiddenException();
 
     const isDeleted = await this.PostsService.deletePostById(postId);
-    if (!isDeleted) throw new InternalServerErrorException();
+    if (!isDeleted) throw new NotFoundException();
 
     return;
   }

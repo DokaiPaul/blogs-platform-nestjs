@@ -4,17 +4,20 @@ import { Model } from 'mongoose';
 import { Blog, BlogDocument } from '../../blogs/infrastructure/blog.schema';
 import { CreateBlogDto } from '../../blogs/application/dto/create.blog.dto';
 import { BlogsRepository } from '../../blogs/infrastructure/blogs.repository';
+import { User, UserDocument } from '../../users/infrastructure/users.schema';
 
 @Injectable()
 export class BloggerBlogsService {
   constructor(
     @InjectModel(Blog.name) private BlogModel: Model<BlogDocument>,
+    @InjectModel(User.name) private UserModel: Model<UserDocument>,
     private BlogsRepository: BlogsRepository,
   ) {}
 
   async isBlogBelongsToUser(blogId: string, userId: string) {
     const blog = await this.BlogModel.findById(blogId);
-    if (!blog) return 'Not found';
+    const user = await this.UserModel.findById(userId);
+    if (!blog || !user) return 'Not found';
     if (blog.blogOwnerInfo.userId !== userId) return 'Not owner';
 
     return true;
