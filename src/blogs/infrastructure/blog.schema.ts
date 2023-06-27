@@ -1,5 +1,6 @@
 import { HydratedDocument } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { BanInfo } from '../../users/infrastructure/users.schema';
 
 export type BlogDocument = HydratedDocument<Blog>;
 
@@ -10,6 +11,18 @@ export class BlogOwnerInfo {
 
   @Prop()
   userLogin: string | null;
+}
+
+@Schema()
+export class BlackListInfo {
+  @Prop({ required: true })
+  id: string;
+
+  @Prop({ required: true })
+  login: string;
+
+  @Prop({ required: true })
+  banInfo: BanInfo;
 }
 
 @Schema()
@@ -34,6 +47,9 @@ export class Blog {
 
   @Prop({ required: true })
   blogOwnerInfo: BlogOwnerInfo;
+
+  @Prop({ default: [] })
+  blackList: BlackListInfo[];
 }
 
 export const BlogSchema = SchemaFactory.createForClass(Blog);

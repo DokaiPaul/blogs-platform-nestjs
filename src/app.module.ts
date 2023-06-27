@@ -47,8 +47,14 @@ import { BloggerBlogsService } from './01_blogger.api/blogs/blogger.blogs.servic
 import { SaBlogsService } from './00_super-admin.api/blogs/sa.blogs.service';
 import { SuperAdminBlogsController } from './00_super-admin.api/blogs/sa.blogs.controller';
 import { BanBlogUseCaseService } from './00_super-admin.api/blogs/use-cases/ban-blog-use-case.service';
+import { BloggerUsersController } from './01_blogger.api/users/blogger.users.controller';
+import { BanUserInBlogUseCaseService } from './01_blogger.api/users/use-cases/ban-user-in-blog-use-case.service';
 
-const useCases = [BanBlogUseCaseService, BanUserUseCaseService];
+const useCases = [
+  BanBlogUseCaseService,
+  BanUserUseCaseService,
+  BanUserInBlogUseCaseService,
+];
 const repositories = [
   UsersRepository,
   BlogsRepository,
@@ -89,6 +95,7 @@ const queryRepositories = [
     SuperAdminUsersController,
     SuperAdminBlogsController,
     BloggerBlogsController,
+    BloggerUsersController,
   ],
   providers: [
     UsersService,
