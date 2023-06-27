@@ -46,19 +46,33 @@ import { BloggerBlogsController } from './01_blogger.api/blogs/blogger.blogs.con
 import { BloggerBlogsService } from './01_blogger.api/blogs/blogger.blogs.service';
 import { SaBlogsService } from './00_super-admin.api/blogs/sa.blogs.service';
 import { SuperAdminBlogsController } from './00_super-admin.api/blogs/sa.blogs.controller';
+import { BanBlogUseCaseService } from './00_super-admin.api/blogs/use-cases/ban-blog-use-case.service';
+
+const useCases = [BanBlogUseCaseService, BanUserUseCaseService];
+const repositories = [
+  UsersRepository,
+  BlogsRepository,
+  PostsRepository,
+  CommentsRepository,
+  ActiveSessionRepository,
+];
+const queryRepositories = [
+  UsersQueryRepository,
+  BlogsQueryRepository,
+  PostsQueryRepository,
+  CommentsQueryRepository,
+];
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     MongooseModule.forRoot(process.env.MONGO_URL),
-    MongooseModule.forFeature([{ name: Blog.name, schema: BlogSchema }]),
-    MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
-    MongooseModule.forFeature([{ name: Comment.name, schema: CommentSchema }]),
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     MongooseModule.forFeature([
+      { name: Blog.name, schema: BlogSchema },
+      { name: Post.name, schema: PostSchema },
+      { name: Comment.name, schema: CommentSchema },
+      { name: User.name, schema: UserSchema },
       { name: PasswordRecovery.name, schema: PasswordRecoverySchema },
-    ]),
-    MongooseModule.forFeature([
       { name: ActiveSession.name, schema: ActiveSessionSchema },
     ]),
     AuthModule,
@@ -78,27 +92,20 @@ import { SuperAdminBlogsController } from './00_super-admin.api/blogs/sa.blogs.c
   ],
   providers: [
     UsersService,
-    UsersRepository,
-    UsersQueryRepository,
     BlogsService,
-    BlogsRepository,
-    BlogsQueryRepository,
     PostsService,
-    PostsRepository,
-    PostsQueryRepository,
-    CommentsQueryRepository,
-    CommentsRepository,
     CommentsService,
     EmailsManager,
     EmailAdapter,
     AuthService,
     ActiveSessionService,
-    ActiveSessionRepository,
     JwtService,
     IsBlogExistConstraint,
-    BanUserUseCaseService,
     SaBlogsService,
     BloggerBlogsService,
+    ...queryRepositories,
+    ...repositories,
+    ...useCases,
   ],
 })
 export class AppModule {}

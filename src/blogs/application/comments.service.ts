@@ -13,6 +13,7 @@ export class CommentsService {
   async addComment(
     content: string,
     postId: string,
+    blogId: string,
     commentatorInfo: {
       userId: string;
       userLogin: string;
@@ -20,6 +21,7 @@ export class CommentsService {
   ) {
     const newComment = {
       postId,
+      blogId,
       content,
       commentatorInfo,
       createdAt: new Date().toISOString(),

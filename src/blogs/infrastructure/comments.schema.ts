@@ -21,6 +21,9 @@ export class Comment {
   @Prop({ required: true })
   postId: string;
 
+  @Prop({ required: true })
+  blogId: string;
+
   @Prop({ required: true, type: { userId: String, userLogin: String } })
   commentatorInfo: { userId: string; userLogin: string };
 

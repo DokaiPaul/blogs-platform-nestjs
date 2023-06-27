@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Body,
   Controller,
   Get,
   HttpCode,
@@ -12,11 +13,14 @@ import {
 import { BasicAuthGuard } from '../../auth/guards/basic.guard';
 import { BlogsQueryRepository } from '../../blogs/infrastructure/blogs.query.repository';
 import { SaBlogsService } from './sa.blogs.service';
+import { BanBlogUseCaseService } from './use-cases/ban-blog-use-case.service';
+import { BanBlogInputDto } from './dto/ban-blog-input.dto';
 
 @Controller('sa/blogs')
 export class SuperAdminBlogsController {
   constructor(
     private BlogsQueryRepository: BlogsQueryRepository,
+    private BanBlogUseCaseService: BanBlogUseCaseService,
     private BlogsService: SaBlogsService,
   ) {}
 
@@ -45,6 +49,22 @@ export class SuperAdminBlogsController {
       });
 
     if (!isBound) throw new InternalServerErrorException();
+
+    return;
+  }
+
+  @UseGuards(BasicAuthGuard)
+  @Put(':id/ban')
+  @HttpCode(204)
+  async banBlogById(
+    @Param('id') blogId: string,
+    @Body() inputDto: BanBlogInputDto,
+  ) {
+    const result = await this.BanBlogUseCaseService.changeBanStatusByBlogId(
+      blogId,
+      inputDto,
+    );
+    if (!result) throw new InternalServerErrorException();
 
     return;
   }

@@ -126,4 +126,18 @@ export class PostsRepository {
       return false;
     }
   }
+
+  async changeHideStatusAllPostsByBlogId(blogId: string, status: boolean) {
+    try {
+      const result = await this.PostModel.updateMany(
+        { blogId: blogId },
+        { $set: { isHidden: status } },
+      );
+
+      return result.acknowledged;
+    } catch (e) {
+      console.error(e);
+      return false;
+    }
+  }
 }

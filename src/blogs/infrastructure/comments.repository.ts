@@ -124,6 +124,20 @@ export class CommentsRepository {
     }
   }
 
+  async changeHideStatusAllCommentsByBlogId(blogId: string, status: boolean) {
+    try {
+      const result = await this.CommentModel.updateMany(
+        { blogId: blogId },
+        { $set: { isHidden: status } },
+      );
+
+      return result.acknowledged;
+    } catch (e) {
+      console.error(e);
+      return false;
+    }
+  }
+
   async hideAllLikesByUserId(userId: string, hideStatus: boolean) {
     try {
       const result = await this.CommentModel.updateMany(
