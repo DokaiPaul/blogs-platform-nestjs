@@ -38,7 +38,12 @@ export class BanBlogUseCaseService {
     const blog = await this.BlogModel.findById(blogId);
 
     try {
-      blog.isHidden = status;
+      blog.banInfo.isBanned = status;
+
+      status
+        ? (blog.banInfo.banDate = new Date().toISOString())
+        : (blog.banInfo.banDate = null);
+
       blog.save();
 
       return true;

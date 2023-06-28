@@ -14,6 +14,15 @@ export class BlogOwnerInfo {
 }
 
 @Schema()
+class BanBlogInfo {
+  @Prop({ required: true })
+  isBanned: boolean;
+
+  @Prop({ required: true })
+  banDate: string;
+}
+
+@Schema()
 export class BlackListInfo {
   @Prop({ required: true })
   id: string;
@@ -47,6 +56,9 @@ export class Blog {
 
   @Prop({ required: true })
   blogOwnerInfo: BlogOwnerInfo;
+
+  @Prop({ required: true })
+  banInfo: BanBlogInfo;
 
   @Prop({ default: [] })
   blackList: BlackListInfo[];

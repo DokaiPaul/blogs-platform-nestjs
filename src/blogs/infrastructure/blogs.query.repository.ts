@@ -104,11 +104,15 @@ export class BlogsQueryRepository {
     let sortedUsers = [];
     let totalMatchedPosts = 0;
     let totalPages = 0;
-    const pageSize = query?.pageSize || 10;
-    const pageNum = query?.pageNumber || 1;
+
+    const pageSize = +query?.pageSize || 10;
+    const pageNum = +query?.pageNumber || 1;
     const searchTerm = query?.searchLoginTerm ?? '';
     const sortBy = query?.sortBy ?? 'id';
     const sortDirection = query?.sortDirection === 'desc' ? 'desc' : 'asc';
+
+    const startIndex = (pageNum - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
 
     const blog = await this.BlogModel.findById(blogId);
     if (blog) {
@@ -138,7 +142,7 @@ export class BlogsQueryRepository {
       page: pageNum,
       pageSize: pageSize,
       totalCount: totalMatchedPosts,
-      items: sortedUsers,
+      items: sortedUsers.slice(startIndex, endIndex),
     };
   }
 
@@ -191,6 +195,10 @@ export class BlogsQueryRepository {
         blogOwnerInfo: {
           userId: dto.blogOwnerInfo.userId,
           userLogin: dto.blogOwnerInfo.userLogin,
+        },
+        banInfo: {
+          isBanned: dto.banInfo.isBanned,
+          banDate: dto.banInfo.banDate,
         },
       };
 

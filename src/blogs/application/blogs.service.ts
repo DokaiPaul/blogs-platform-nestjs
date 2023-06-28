@@ -40,6 +40,10 @@ export class BlogsService {
       createdAt: new Date().toISOString(),
       isMembership: false,
       blogOwnerInfo: blogOwnerData,
+      banInfo: {
+        isBanned: false,
+        banDate: null,
+      },
     };
 
     const { blogOwnerInfo, ...blogWithoutOwnerInfo } = newBlog;

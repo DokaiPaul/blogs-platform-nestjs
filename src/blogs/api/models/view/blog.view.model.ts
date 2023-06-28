@@ -1,5 +1,10 @@
 import { BlogOwnerInfo } from '../../../infrastructure/blog.schema';
 
+type BanInfo = {
+  isBanned: boolean;
+  banDate: string;
+};
+
 export type BlogViewModel = {
   id: string;
   name: string;
@@ -17,4 +22,5 @@ export type saBlogViewModel = {
   createdAt: string;
   isMembership: boolean;
   blogOwnerInfo: BlogOwnerInfo;
+  banInfo: BanInfo;
 };
