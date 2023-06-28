@@ -4,7 +4,7 @@ import {
   ForbiddenException,
   Get,
   HttpCode,
-  InternalServerErrorException,
+  NotFoundException,
   Param,
   Put,
   Query,
@@ -29,7 +29,15 @@ export class BloggerUsersController {
   async getBannedUsers(
     @Param('id') blogId: string,
     @Query() queryParams: QueryBannedUsersInBlogModel,
+    @Req() req,
   ) {
+    const userId = req.user.userId;
+    const isBlogOwner = await this.BanUserInBlogUseCase.isBlogOwner(
+      blogId,
+      userId,
+    );
+    if (!isBlogOwner) throw new ForbiddenException();
+
     const users = this.BlogsQueryRepository.getAllBannedUsersInBlog(
       blogId,
       queryParams,
@@ -51,7 +59,7 @@ export class BloggerUsersController {
       req.user.userId,
       inputDto,
     );
-    if (!result) throw new ForbiddenException();
+    if (!result) throw new NotFoundException();
 
     return;
   }

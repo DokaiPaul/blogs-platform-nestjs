@@ -53,6 +53,13 @@ export class BanUserInBlogUseCaseService {
     return isUserUnbanned;
   }
 
+  async isBlogOwner(blogId: string, bloggerId: string) {
+    const blog = await this.BlogModel.findById(blogId);
+    if (!blog) return false;
+
+    return blog.blogOwnerInfo.userId === bloggerId;
+  }
+
   private async getUserById(userId: string) {
     return this.UserQueryRepository.getUserById(userId);
   }
