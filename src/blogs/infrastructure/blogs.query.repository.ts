@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { QueryBlogParamsModel } from '../api/models/input/query.params.model';
+import {
+  QueryBannedUsersInBlogModel,
+  QueryBlogParamsModel,
+} from '../api/models/input/query.params.model';
 import { Blog, BlogDocument } from './blog.schema';
 import { Model, SortOrder } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
@@ -91,6 +94,52 @@ export class BlogsQueryRepository {
     if (!blog) return null;
 
     return this.convertToViewBlog(blog);
+  }
+
+  async getAllBannedUsersInBlog(
+    blogId: string,
+    query?: QueryBannedUsersInBlogModel,
+  ) {
+    let bannedUsers;
+    let sortedUsers = [];
+    let totalMatchedPosts = 0;
+    let totalPages = 0;
+    const pageSize = query?.pageSize || 10;
+    const pageNum = query?.pageNumber || 1;
+    const searchTerm = query?.searchLoginTerm ?? '';
+    const sortBy = query?.sortBy ?? 'id';
+    const sortDirection = query?.sortDirection === 'desc' ? 'desc' : 'asc';
+
+    const blog = await this.BlogModel.findById(blogId);
+    if (blog) {
+      bannedUsers = blog.blackList;
+
+      const filteredUsers = bannedUsers.filter((u) =>
+        u.login.includes(searchTerm),
+      );
+      sortedUsers = filteredUsers.sort((a, b) => {
+        if (sortDirection === 'asc') {
+          if (a[sortBy] > b[sortBy]) return 1;
+          if (a[sortBy] < b[sortBy]) return -1;
+          return 0;
+        }
+        if (sortDirection === 'desc') {
+          if (a[sortBy] < b[sortBy]) return 1;
+          if (a[sortBy] > b[sortBy]) return -1;
+          return 0;
+        }
+      });
+      totalMatchedPosts = filteredUsers.length;
+      totalPages = Math.ceil(totalMatchedPosts / pageSize);
+    }
+
+    return {
+      pagesCount: totalPages,
+      page: pageNum,
+      pageSize: pageSize,
+      totalCount: totalMatchedPosts,
+      items: sortedUsers,
+    };
   }
 
   //define default values if the values are not provided in query params

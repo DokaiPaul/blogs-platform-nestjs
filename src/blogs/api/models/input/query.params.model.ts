@@ -13,6 +13,13 @@ export type QueryCommentParamsModel = Omit<
   'searchNameTerm'
 >;
 
+export type QueryBannedUsersInBlogModel = Omit<
+  QueryBlogParamsModel,
+  'searchNameTerm'
+> & {
+  searchLoginTerm?: string;
+};
+
 export type QueryUserParamsModel = Omit<
   QueryBlogParamsModel,
   'searchNameTerm'
