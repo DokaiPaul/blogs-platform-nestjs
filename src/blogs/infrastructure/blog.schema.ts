@@ -18,8 +18,8 @@ class BanBlogInfo {
   @Prop({ required: true })
   isBanned: boolean;
 
-  @Prop({ required: true })
-  banDate: string;
+  @Prop()
+  banDate: string | null;
 }
 
 @Schema()
