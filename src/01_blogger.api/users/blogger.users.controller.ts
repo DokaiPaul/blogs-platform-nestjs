@@ -1,12 +1,14 @@
 import {
   Body,
   Controller,
+  ForbiddenException,
   Get,
   HttpCode,
   InternalServerErrorException,
   Param,
   Put,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { BanUserInBlogDto } from './dto/ban-user-in-blog.dto';
@@ -42,12 +44,14 @@ export class BloggerUsersController {
   async banUserInBlog(
     @Param('id') userId: string,
     @Body() inputDto: BanUserInBlogDto,
+    @Req() req,
   ) {
     const result = await this.BanUserInBlogUseCase.setUserBanStatusInBlog(
       userId,
+      req.user.userId,
       inputDto,
     );
-    if (!result) throw new InternalServerErrorException();
+    if (!result) throw new ForbiddenException();
 
     return;
   }

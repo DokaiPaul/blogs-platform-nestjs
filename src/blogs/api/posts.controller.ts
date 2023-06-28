@@ -14,6 +14,7 @@ import {
   Req,
   UnauthorizedException,
   UseGuards,
+  ForbiddenException,
 } from '@nestjs/common';
 import { PostsService } from '../application/posts.service';
 import { PostsQueryRepository } from '../infrastructure/posts.query.repository';
@@ -26,10 +27,14 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersQueryRepository } from '../../users/infrastructure/users.query.repository';
 import { AccessTokenGuard } from '../../auth/guards/accessToken.guard';
 import { SetLikeStatusDto } from '../application/dto/set.like.status.dto';
+import { Model } from 'mongoose';
+import { Blog, BlogDocument } from '../infrastructure/blog.schema';
+import { InjectModel } from '@nestjs/mongoose';
 
 @Controller('posts')
 export class PostsController {
   constructor(
+    @InjectModel(Blog.name) private BlogsModel: Model<BlogDocument>,
     private PostsService: PostsService,
     private PostsQueryRepository: PostsQueryRepository,
     private CommentsService: CommentsService,
@@ -67,6 +72,10 @@ export class PostsController {
     const userId = req.user.userId;
     const user = await this.UserQueryRepository.getUserById(userId);
     if (!user) throw new InternalServerErrorException();
+
+    const blog = await this.BlogsModel.findById(post.blogId);
+    if (!blog || blog.blackList.find((u) => u.id === userId))
+      throw new ForbiddenException();
 
     const userInfo = { userId, userLogin: user.login };
     const content = commentInput.content;

@@ -16,9 +16,15 @@ export class BanUserInBlogUseCaseService {
     @InjectModel(Blog.name) private BlogModel: Model<BlogDocument>,
   ) {}
 
-  async setUserBanStatusInBlog(userId: string, banDetails: BanUserInBlogDto) {
+  async setUserBanStatusInBlog(
+    userId: string,
+    bloggerId: string,
+    banDetails: BanUserInBlogDto,
+  ) {
     const user = await this.getUserById(userId);
     if (!user) return null;
+    const blog = await this.BlogModel.findById(banDetails.blogId);
+    if (!blog || blog.blogOwnerInfo.userId !== bloggerId) return null;
 
     if (banDetails.isBanned) {
       const infoAboutUser = {
