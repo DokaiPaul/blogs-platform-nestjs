@@ -82,8 +82,7 @@ export class PostsController {
 
     const comment = await this.CommentsService.addComment(
       content,
-      postId,
-      post.blogId,
+      post,
       userInfo,
     );
 

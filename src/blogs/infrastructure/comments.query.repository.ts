@@ -1,16 +1,68 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Comment, CommentDocument } from './comments.schema';
 import { Model, SortOrder } from 'mongoose';
-import { CommentViewModel } from '../api/models/view/comment.view.model';
+import {
+  CommentToBloggerViewModel,
+  CommentViewModel,
+} from '../api/models/view/comment.view.model';
 import { LikeStatus } from '../api/models/view/likes.info.view.model';
 import { QueryCommentParamsModel } from '../api/models/input/query.params.model';
+import { Blog, BlogDocument } from './blog.schema';
 
 @Injectable()
 export class CommentsQueryRepository {
   constructor(
     @InjectModel(Comment.name) private CommentModel: Model<CommentDocument>,
+    @InjectModel(Blog.name) private BlogModel: Model<BlogDocument>,
   ) {}
+
+  async getAllCommentsInUserBlogs(
+    userId: string,
+    queryParams: QueryCommentParamsModel,
+  ) {
+    const { sortBy, sorDirection, pageNum, pageSize } =
+      this.getQueryParams(queryParams);
+
+    const allBloggersBlogs = await this.BlogModel.find({
+      'blogOwnerInfo.userId': userId,
+    });
+    if (!allBloggersBlogs) throw new NotFoundException();
+    const blogsIds = allBloggersBlogs.map((b) => b._id);
+
+    const sort = { [sortBy]: sorDirection as SortOrder };
+    const filter: any = {
+      $and: [
+        {
+          isHidden: false,
+        },
+        {
+          blogId: { $in: blogsIds },
+        },
+      ],
+    };
+
+    const comments =
+      (await this.CommentModel.find(filter)
+        .sort(sort)
+        .limit(pageSize)
+        .skip((pageNum - 1) * pageSize)) ?? [];
+
+    const commentsToViewModel = comments.map((c) =>
+      this.convertToCommentView(c, userId),
+    );
+
+    const totalMatchedPosts = await this.CommentModel.countDocuments(filter);
+    const totalPages = Math.ceil(totalMatchedPosts / pageSize);
+
+    return {
+      pagesCount: totalPages,
+      page: pageNum,
+      pageSize: pageSize,
+      totalCount: totalMatchedPosts,
+      items: commentsToViewModel,
+    };
+  }
 
   async getCommentsInPost(
     queryParams?: QueryCommentParamsModel,
@@ -86,8 +138,9 @@ export class CommentsQueryRepository {
 
   private convertToCommentView(
     comment: CommentDocument,
+    requestBy: string,
     userId?,
-  ): CommentViewModel {
+  ): CommentViewModel | CommentToBloggerViewModel {
     let myStatus = LikeStatus.None;
 
     if (userId) {
@@ -102,7 +155,7 @@ export class CommentsQueryRepository {
       if (isDisliked) myStatus = LikeStatus.Dislike;
     }
 
-    return {
+    const commentToUser = {
       id: comment._id.toString(),
       content: comment.content,
       createdAt: comment.createdAt,
@@ -116,5 +169,19 @@ export class CommentsQueryRepository {
         userLogin: comment.commentatorInfo.userLogin,
       },
     };
+
+    if (requestBy === 'Admin') {
+      return {
+        ...commentToUser,
+        postInfo: {
+          id: comment.postInfo.id,
+          title: comment.postInfo.title,
+          blogId: comment.postInfo.blogId,
+          blogName: comment.postInfo.blogName,
+        },
+      };
+    }
+
+    return commentToUser;
   }
 }

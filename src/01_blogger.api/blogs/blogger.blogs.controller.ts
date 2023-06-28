@@ -19,9 +19,13 @@ import { CreatePostDto } from '../../blogs/application/dto/create.post.dto';
 import { BlogsQueryRepository } from '../../blogs/infrastructure/blogs.query.repository';
 import { PostsService } from '../../blogs/application/posts.service';
 import { CreateBlogDto } from '../../blogs/application/dto/create.blog.dto';
-import { QueryBlogParamsModel } from '../../blogs/api/models/input/query.params.model';
+import {
+  QueryBlogParamsModel,
+  QueryCommentParamsModel,
+} from '../../blogs/api/models/input/query.params.model';
 import { BloggerBlogsService } from './blogger.blogs.service';
 import { BlogsService } from '../../blogs/application/blogs.service';
+import { CommentsQueryRepository } from '../../blogs/infrastructure/comments.query.repository';
 
 @Controller('blogger/blogs')
 export class BloggerBlogsController {
@@ -31,6 +35,7 @@ export class BloggerBlogsController {
     private BlogRepository: BlogsRepository,
     private BlogsQueryRepository: BlogsQueryRepository,
     private PostsService: PostsService,
+    private CommentQueryRepository: CommentsQueryRepository,
   ) {}
 
   @UseGuards(AccessTokenGuard)
@@ -73,6 +78,20 @@ export class BloggerBlogsController {
     const userId = req?.user?.userId;
 
     return await this.BlogsQueryRepository.getAllBloggersBlogs(
+      userId,
+      queryParams,
+    );
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Get('comments')
+  async getAllCommentsInBlogs(
+    @Req() req,
+    @Query() queryParams: QueryCommentParamsModel,
+  ) {
+    const userId = req?.user?.userId;
+
+    return await this.CommentQueryRepository.getAllCommentsInUserBlogs(
       userId,
       queryParams,
     );

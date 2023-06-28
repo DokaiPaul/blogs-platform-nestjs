@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CommentsRepository } from '../infrastructure/comments.repository';
 import { CommentLikeStatusDto } from './dto/set.like.status.dto';
 import { CommentsQueryRepository } from '../infrastructure/comments.query.repository';
+import { PostViewModel } from '../api/models/view/post.view.model';
 
 @Injectable()
 export class CommentsService {
@@ -12,18 +13,22 @@ export class CommentsService {
 
   async addComment(
     content: string,
-    postId: string,
-    blogId: string,
+    post: PostViewModel,
     commentatorInfo: {
       userId: string;
       userLogin: string;
     },
   ) {
+    const { id, title, blogId, blogName } = post;
     const newComment = {
-      postId,
-      blogId,
       content,
       commentatorInfo,
+      postInfo: {
+        id,
+        title,
+        blogId,
+        blogName,
+      },
       createdAt: new Date().toISOString(),
       likes: [],
       dislikes: [],
