@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { BanUserInBlogDto } from '../dto/ban-user-in-blog.dto';
 import { UsersQueryRepository } from '../../../users/infrastructure/users.query.repository';
 import { InjectModel } from '@nestjs/mongoose';
@@ -22,9 +26,10 @@ export class BanUserInBlogUseCaseService {
     banDetails: BanUserInBlogDto,
   ) {
     const user = await this.getUserById(userId);
-    if (!user) return null;
+    if (!user) throw new NotFoundException();
     const blog = await this.BlogModel.findById(banDetails.blogId);
-    if (!blog || blog.blogOwnerInfo.userId !== bloggerId) return null;
+    if (!blog || blog.blogOwnerInfo.userId !== bloggerId)
+      throw new ForbiddenException();
 
     if (banDetails.isBanned) {
       const infoAboutUser = {
@@ -55,7 +60,7 @@ export class BanUserInBlogUseCaseService {
 
   async isBlogOwner(blogId: string, bloggerId: string) {
     const blog = await this.BlogModel.findById(blogId);
-    if (!blog) return false;
+    if (!blog) throw new NotFoundException();
 
     return blog.blogOwnerInfo.userId === bloggerId;
   }

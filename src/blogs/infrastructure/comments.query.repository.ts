@@ -28,7 +28,7 @@ export class CommentsQueryRepository {
       'blogOwnerInfo.userId': userId,
     });
     if (!allBloggersBlogs) throw new NotFoundException();
-    const blogsIds = allBloggersBlogs.map((b) => b._id);
+    const blogsIds = allBloggersBlogs.map((b) => b._id.toString());
 
     const sort = { [sortBy]: sorDirection as SortOrder };
     const filter: any = {

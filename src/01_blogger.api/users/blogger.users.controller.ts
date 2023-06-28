@@ -4,7 +4,6 @@ import {
   ForbiddenException,
   Get,
   HttpCode,
-  NotFoundException,
   Param,
   Put,
   Query,
@@ -36,7 +35,7 @@ export class BloggerUsersController {
       blogId,
       userId,
     );
-    if (!isBlogOwner) throw new NotFoundException();
+    if (!isBlogOwner) throw new ForbiddenException();
 
     const users = this.BlogsQueryRepository.getAllBannedUsersInBlog(
       blogId,
@@ -54,12 +53,11 @@ export class BloggerUsersController {
     @Body() inputDto: BanUserInBlogDto,
     @Req() req,
   ) {
-    const result = await this.BanUserInBlogUseCase.setUserBanStatusInBlog(
+    await this.BanUserInBlogUseCase.setUserBanStatusInBlog(
       userId,
       req.user.userId,
       inputDto,
     );
-    if (!result) throw new ForbiddenException();
 
     return;
   }
