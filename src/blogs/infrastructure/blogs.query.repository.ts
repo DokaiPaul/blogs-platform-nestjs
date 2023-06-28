@@ -22,11 +22,22 @@ export class BlogsQueryRepository {
   ): Promise<PaginatorViewModel<BlogViewModel | []>> {
     const { searchNameTerm, sortBy, sorDirection, pageNum, pageSize } =
       this.getQueryParams(queryParams);
+    let filter;
 
-    const filter = !searchNameTerm
-      ? {} //if search name term is not provided filter is an empty object
-      : { name: { $regex: searchNameTerm, $options: 'i' } };
-
+    if (requestBy === 'Admin') {
+      filter = !searchNameTerm
+        ? {} //if search name term is not provided filter is an empty object
+        : { name: { $regex: searchNameTerm, $options: 'i' } };
+    } else {
+      filter = !searchNameTerm
+        ? { 'banInfo.isBanned': false } //if search name term is not provided filter is an empty object
+        : {
+            $and: [
+              { 'banInfo.isBanned': false },
+              { name: { $regex: searchNameTerm, $options: 'i' } },
+            ],
+          };
+    }
     const sort = { [sortBy]: sorDirection as SortOrder };
 
     const blogs =
@@ -91,7 +102,7 @@ export class BlogsQueryRepository {
 
   async getBlogById(blogId: string): Promise<BlogViewModel | null> {
     const blog = await this.BlogModel.findById(blogId);
-    if (!blog) return null;
+    if (!blog || blog.banInfo.isBanned) return null;
 
     return this.convertToViewBlog(blog);
   }
