@@ -37,7 +37,7 @@ export class CommentsQueryRepository {
           isHidden: false,
         },
         {
-          blogId: { $in: blogsIds },
+          'postInfo.blogId': { $in: blogsIds },
         },
       ],
     };
