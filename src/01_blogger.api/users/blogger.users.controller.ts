@@ -36,7 +36,7 @@ export class BloggerUsersController {
       blogId,
       userId,
     );
-    if (!isBlogOwner) throw new ForbiddenException();
+    if (!isBlogOwner) throw new NotFoundException();
 
     const users = this.BlogsQueryRepository.getAllBannedUsersInBlog(
       blogId,
@@ -59,7 +59,7 @@ export class BloggerUsersController {
       req.user.userId,
       inputDto,
     );
-    if (!result) throw new NotFoundException();
+    if (!result) throw new ForbiddenException();
 
     return;
   }
