@@ -49,7 +49,7 @@ export class CommentsQueryRepository {
         .skip((pageNum - 1) * pageSize)) ?? [];
 
     const commentsToViewModel = comments.map((c) =>
-      this.convertToCommentView(c, userId),
+      this.convertToCommentView(c, 'Blogger', userId),
     );
 
     const totalMatchedPosts = await this.CommentModel.countDocuments(filter);
@@ -83,7 +83,7 @@ export class CommentsQueryRepository {
         .skip((pageNum - 1) * pageSize)) ?? [];
 
     const commentsToViewModel = comments.map((c) =>
-      this.convertToCommentView(c, userId),
+      this.convertToCommentView(c, 'User', userId),
     );
 
     const totalMatchedPosts = await this.CommentModel.countDocuments(filter);
@@ -107,7 +107,7 @@ export class CommentsQueryRepository {
     });
     if (!comment) return null;
 
-    return this.convertToCommentView(comment, userId);
+    return this.convertToCommentView(comment, 'User', userId);
   }
 
   private getQueryParams(queryParams: QueryCommentParamsModel) {
@@ -170,7 +170,7 @@ export class CommentsQueryRepository {
       },
     };
 
-    if (requestBy === 'Admin') {
+    if (requestBy === 'Blogger') {
       return {
         ...commentToUser,
         postInfo: {
