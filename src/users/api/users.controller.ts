@@ -19,13 +19,20 @@ import { UserInputModel } from './models/input/user.input.model';
 import { QueryUserParamsModel } from '../../blogs/api/models/input/query.params.model';
 import { PaginatorViewModel } from '../../blogs/api/models/view/paginator.view.model';
 import { BasicAuthGuard } from '../../auth/guards/basic.guard';
+import { UsersRepositorySQL } from '../infrastructure/db/sql-db/users.repository';
 
 @Controller('users')
 export class UsersController {
   constructor(
     private userService: UsersService,
     private usersQueryRepository: UsersQueryRepository,
+    private usersSQL: UsersRepositorySQL,
   ) {}
+
+  @Get('test')
+  async testUser() {
+    return this.usersSQL.findUser();
+  }
 
   @UseGuards(BasicAuthGuard)
   @HttpCode(201)

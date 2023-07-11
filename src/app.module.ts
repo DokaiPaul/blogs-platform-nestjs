@@ -49,6 +49,8 @@ import { SuperAdminBlogsController } from './00_super-admin.api/blogs/sa.blogs.c
 import { BanBlogUseCaseService } from './00_super-admin.api/blogs/use-cases/ban-blog-use-case.service';
 import { BloggerUsersController } from './01_blogger.api/users/blogger.users.controller';
 import { BanUserInBlogUseCaseService } from './01_blogger.api/users/use-cases/ban-user-in-blog-use-case.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UsersRepositorySQL } from './users/infrastructure/db/sql-db/users.repository';
 
 const useCases = [
   BanBlogUseCaseService,
@@ -61,6 +63,7 @@ const repositories = [
   PostsRepository,
   CommentsRepository,
   ActiveSessionRepository,
+  UsersRepositorySQL,
 ];
 const queryRepositories = [
   UsersQueryRepository,
@@ -72,6 +75,13 @@ const queryRepositories = [
 @Module({
   imports: [
     ConfigModule.forRoot(),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      url: `postgres://${process.env.PGUSER}:${process.env.PGPASSWORD}@${process.env.PGHOST}/${process.env.PGDATABASE}`,
+      autoLoadEntities: false,
+      synchronize: false,
+      ssl: { rejectUnauthorized: false },
+    }),
     MongooseModule.forRoot(process.env.MONGO_URL),
     MongooseModule.forFeature([
       { name: Blog.name, schema: BlogSchema },
