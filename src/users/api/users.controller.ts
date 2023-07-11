@@ -30,8 +30,8 @@ export class UsersController {
   ) {}
 
   @Get('test')
-  async testUser() {
-    return this.usersSQL.findUser();
+  async testEndpoint() {
+    return this.usersSQL.deleteUser('8994986a-53d2-4b36-a2e6-6609b7a26532');
   }
 
   @UseGuards(BasicAuthGuard)

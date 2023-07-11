@@ -22,6 +22,7 @@ import { EmailAdapter } from '../adapters/email.adapter';
 import { AccessTokenStrategy } from './strategies/accessToken.strategy';
 import { RefreshTokenStrategy } from './strategies/refreshToken.strategy';
 import { BasicStrategy } from './strategies/basic.strategy';
+import { UsersRepositorySQL } from '../users/infrastructure/db/sql-db/users.repository';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { BasicStrategy } from './strategies/basic.strategy';
     ActiveSessionRepository,
     EmailsManager,
     EmailAdapter,
+    UsersRepositorySQL,
   ],
   exports: [AuthService],
 })

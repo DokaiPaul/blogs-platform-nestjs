@@ -7,12 +7,14 @@ import { EmailsManager } from '../../managers/email.sender.manager';
 import { User } from '../infrastructure/users.schema';
 import { v4 as uuidv4 } from 'uuid';
 import { add } from 'date-fns';
+import { UsersRepositorySQL } from '../infrastructure/db/sql-db/users.repository';
 
 @Injectable()
 export class UsersService {
   constructor(
     private usersRepository: UsersRepository,
     private EmailManager: EmailsManager,
+    private repoSQL: UsersRepositorySQL,
   ) {}
 
   async createUser(
@@ -44,7 +46,7 @@ export class UsersService {
       },
     };
 
-    const createdUser = await this.usersRepository.insertUser(user);
+    const createdUser = await this.repoSQL.insertUser(user);
 
     try {
       await this.EmailManager.sendEmailConfirmationCode(
