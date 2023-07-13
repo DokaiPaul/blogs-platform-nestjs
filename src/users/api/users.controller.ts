@@ -31,7 +31,9 @@ export class UsersController {
 
   @Get('test')
   async testEndpoint() {
-    return this.usersSQL.deleteUser('8994986a-53d2-4b36-a2e6-6609b7a26532');
+    return this.usersSQL.findUserByConfirmationCode(
+      'ad66af81-aeb9-4b29-958c-2e04e933f265',
+    );
   }
 
   @UseGuards(BasicAuthGuard)

@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { User } from '../../users.schema';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { ObjectId } from 'mongodb';
+import { PasswordRecovery } from '../../password.recovery.schema';
 
 @Injectable()
 export class UsersRepositorySQL {
@@ -91,7 +93,7 @@ export class UsersRepositorySQL {
       [searchTerm],
     );
 
-    return foundByEmail;
+    return foundByEmail[0];
   }
 
   async deleteUser(userId: string) {
@@ -136,5 +138,131 @@ export class UsersRepositorySQL {
     );
 
     return true;
+  }
+
+  async findUserByConfirmationCode(code: string) {
+    const user = await this.dataSource.query(
+      `
+    SELECT * FROM public."emailConfirmation" ec
+    FULL OUTER JOIN public."users" u
+    ON ec."userId" = u."id"
+    WHERE ec."confirmationCode" = $1
+    `,
+      [code],
+    );
+
+    return user[0];
+  }
+
+  async updateConfirmationStatus(userId: ObjectId) {
+    try {
+      await this.dataSource.query(
+        `
+    UPDATE public."emailConfirmation"
+    SET "confirmationStatus" = true
+    WHERE "userId" = $1
+    `,
+        [userId],
+      );
+
+      return true;
+    } catch (e) {
+      console.error(e);
+      return false;
+    }
+  }
+  async updateConfirmationCode(userId: string, confirmationCode: string) {
+    try {
+      await this.dataSource.query(
+        `
+    UPDATE public."emailConfirmation"
+    SET "confirmationCode" = $1
+    WHERE "userId" = $2
+    `,
+        [confirmationCode, userId],
+      );
+      return true;
+    } catch (e) {
+      console.error(e);
+      return false;
+    }
+  }
+
+  async addRecoveryConfirmationCode(recoveryCodeObject: PasswordRecovery) {
+    try {
+      const { confirmationCode, email, isUsed, creationDate } =
+        recoveryCodeObject;
+      const parameters = [confirmationCode, creationDate, email, isUsed];
+
+      await this.dataSource.query(
+        `
+    INSERT INTO public."passwordRecoveries"
+      (
+      "confirmationCode",
+      "creationDate",
+      "email",
+      "isUsed"
+      )
+    VALUES
+        (
+        $1, $2, $3, $4
+        )
+    `,
+        parameters,
+      );
+
+      return true;
+    } catch (e) {
+      console.error(e);
+      return false;
+    }
+  }
+
+  async findRecoveryConfirmationCode(recoveryCode: string) {
+    const passwordRecovery = await this.dataSource.query(
+      `
+    SELECT *, "id" as _id FROM public."passwordRecoveries"
+    WHERE "recoveryCode" = $1
+    `,
+      [recoveryCode],
+    );
+
+    return passwordRecovery[0];
+  }
+
+  async changeRecoveryCodeStatus(id: string) {
+    try {
+      await this.dataSource.query(
+        `
+    UPDATE public."passwordRecoveries"
+    SET "isUsed" = true
+    WHERE "id" = $1
+    `,
+        [id],
+      );
+
+      return true;
+    } catch (e) {
+      console.error(e);
+      return false;
+    }
+  }
+
+  async updateHash(email: string, passwordHash: string) {
+    try {
+      await this.dataSource.query(
+        `
+    UPDATE public."users"
+    SET "hash" = $1
+    WHERE "email" = $2
+    `,
+        [passwordHash, email],
+      );
+
+      return true;
+    } catch (e) {
+      console.error(e);
+      return false;
+    }
   }
 }
